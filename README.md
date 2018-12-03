@@ -24,7 +24,7 @@ Select
 > **SELECT** ( __"*"__ | identifier ( **","** identifier )* ) **FROM** identifier ( **Where** Condition )? **";"**
 
 Update
-> **UPDATE** identifier **SET** identifier = Value ( **WHERE** Condition )? **";"** 
+> **UPDATE** identifier **SET** identifier **=** Value ( **WHERE** Condition )? **";"** 
 
 Delete
 > **DELETE FROM** identifier ( **WHERE** Condition )? **";"**
@@ -33,7 +33,7 @@ Condition
 > identifier filter Value ( **"and"** identifier filter Value )*
 
 filter
-> ( **">"**|**"="**|**"<"**|**">="**|**"!="**|**"<="** )
+> ( **">"** | **"="** | **"<"** | **">="** | **"!="** | **"<="** )
 
 identifier
 > **alphbet** ( **alphbet** | **digit** )*
