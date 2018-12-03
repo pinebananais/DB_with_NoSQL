@@ -15,31 +15,31 @@ Show
 > **SHOW TABLES ";"**
 
 Create
-> **CREATE TABLE** Table-name **"("** Data-type Attribute-name ( **","** Data-type Attribute-name )* **")" ";"**
+> **CREATE TABLE** identifier **"("** Data-type identifier ( **","** Data-type identifier )* **")" ";"**
 
 Insert
-> **INSERT INTO** Table-name **VALUES "("** Attribute-value ( **","** Attribute-value )* **")" ";"**
+> **INSERT INTO** identifier **VALUES "("** Value ( **","** Value )* **")" ";"**
 
 Select
-> **SELECT** ( __"*"__ | Attribute-name ( **","** Attribute-name )* ) **FROM** Table-name ( **Where** Simple-condition )? **";"**
+> **SELECT** ( __"*"__ | identifier ( **","** identifier )* ) **FROM** identifier ( **Where** Condition )? **";"**
 
 Update
-> **UPDATE** Table-name **SET** Attribute-name = Attribute-value ( **WHERE** Simple-condition )? **";"** 
+> **UPDATE** identifier **SET** identifier = Value ( **WHERE** Condition )? **";"** 
 
 Delete
-> **DELETE FROM** Table-name ( **WHERE** Simple-condition )? **";"**
+> **DELETE FROM** identifier ( **WHERE** Condition )? **";"**
 
-Table-name
-> 
+Condition
+> identifier filter Value ( **"and"** identifier filter Value )*
+
+filter
+> ( **">"**|**"="**|**"<"**|**">="**|**"!="**|**"<="** )
+
+identifier
+> **alphbet** ( **alphbet** | **digit** )*
 
 Data-type
-> **INT | CHAR**
+> **INT** | **CHAR**
 
-Attribute-name
->
-
-Attribute-value
->
-
-Simple-condition
->
+Value
+> **INTLITERAL** | **STRINGLITERAL**
