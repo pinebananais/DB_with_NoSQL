@@ -15,31 +15,37 @@ Show
 > **SHOW TABLES ";"**
 
 Create
-> **CREATE TABLE** identifier **"("** Data-type identifier ( **","** Data-type identifier )* **")" ";"**
+> **CREATE TABLE** identifier **"("** Vardecl ( **","** Vardecl )* **")" ";"**
 
 Insert
 > **INSERT INTO** identifier **VALUES "("** Value ( **","** Value )* **")" ";"**
 
 Select
-> **SELECT** ( __"*"__ | identifier ( **","** identifier )* ) **FROM** identifier ( **Where** Condition )? **";"**
+> **SELECT** ( __"*"__ | identifier ( **","** identifier )* ) **FROM** identifier ( **Where** Conditions )? **";"**
 
 Update
-> **UPDATE** identifier **SET** identifier **=** Value ( **WHERE** Condition )? **";"** 
+> **UPDATE** identifier **SET** identifier **"="** Value ( **WHERE** Conditions )? **";"** 
 
 Delete
-> **DELETE FROM** identifier ( **WHERE** Condition )? **";"**
+> **DELETE FROM** identifier ( **WHERE** Conditions )? **";"**
+
+Vardecl
+> identifier Data-type
+
+Conditions
+> Condition ( ( **"and"** | **"or"** ) Condition )*
 
 Condition
-> identifier filter Value ( **"and"** identifier filter Value )*
+> identifier filter Value | "(" Conditions ")"
 
 filter
 > ( **">"** | **"="** | **"<"** | **">="** | **"!="** | **"<="** )
 
 identifier
-> **alphbet** ( **alphbet** | **digit** )*
+> **alphabet** ( **alphabet** | **digit** )*
 
 Data-type
-> **INT** | **CHAR**
+> **INT** | **VARCHAR**
 
 Value
 > **INTLITERAL** | **STRINGLITERAL**

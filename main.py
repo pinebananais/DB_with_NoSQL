@@ -1,5 +1,5 @@
 import _scanner
-import token
+import my_token
 import _parser
 
 print("\n\n")
@@ -36,9 +36,9 @@ while True:
 		elif ch == ';':
 			code += ch
 			try:
-				result = Parser.parse(code)
-				for x in result:
-					print(x)
+				Parser.parse(code)
+				# for x in result:
+				# 	print(x)
 			except ValueError as err:
 				print(err.args)
 			code = ""

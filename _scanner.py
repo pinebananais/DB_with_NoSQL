@@ -1,4 +1,4 @@
-import token
+import my_token
 
 space_char = {' ', '\t', '\n', '\r'}
 
@@ -32,7 +32,7 @@ class scanner:
 		self.get_next_char()
 
 	def send_cur_token(self):
-		ret = token.token(self.cur_kind, self.cur_token)
+		ret = my_token.token(self.cur_kind, self.cur_token)
 		self.cur_token = ""
 		return ret
 
@@ -45,73 +45,73 @@ class scanner:
 	def scan(self):
 		if self.cur_char == "$":
 			self.push_char()
-			return token.EOF
+			return my_token.EOF
 		if self.cur_char == "+":
 			self.push_char()
-			return token.PLUS
+			return my_token.PLUS
 		if self.cur_char == "-":
 			self.push_char()
-			return token.MINUS
+			return my_token.MINUS
 		if self.cur_char == "*":
 			self.push_char()
-			return token.ASTER
+			return my_token.ASTER
 		if self.cur_char == "/":
 			self.push_char()
-			return token.DIV
+			return my_token.DIV
 		if self.cur_char == "%":
 			self.push_char()
-			return token.MOD
+			return my_token.MOD
 		if self.cur_char == "&":
 			self.push_char()
-			return token.BITAND
+			return my_token.BITAND
 		if self.cur_char == "|":
 			self.push_char()
-			return token.BITOR
+			return my_token.BITOR
 		if self.cur_char == "^":
 			self.push_char()
-			return token.BITXOR
+			return my_token.BITXOR
 		if self.cur_char == ",":
 			self.push_char()
-			return token.COMMA
+			return my_token.COMMA
 		if self.cur_char == ";":
 			self.push_char()
-			return token.SEMICOLON
+			return my_token.SEMICOLON
 		if self.cur_char == ">":
 			self.push_char()
 			if self.cur_char == "=":
 				self.push_char()
-				return token.GREATEREQ
-			return token.GREATER
+				return my_token.GREATEREQ
+			return my_token.GREATER
 		if self.cur_char == "<":
 			self.push_char()
 			if self.cur_char == "=":
 				self.push_char()
-				return token.LESSEQ
+				return my_token.LESSEQ
 			if self.cur_char == ">":
 				self.push_char()
-				return token.NOTEQ
-			return token.LESS
+				return my_token.NOTEQ
+			return my_token.LESS
 		if self.cur_char == "=":
 			self.push_char()
-			return token.EQ
+			return my_token.EQ
 		if self.cur_char == "{":
 			self.push_char()
-			return token.LEFTBRACE
+			return my_token.LEFTBRACE
 		if self.cur_char == "}":
 			self.push_char()
-			return token.RIGHTBRACE
+			return my_token.RIGHTBRACE
 		if self.cur_char == "(":
 			self.push_char()
-			return token.LEFTPAREN
+			return my_token.LEFTPAREN
 		if self.cur_char == ")":
 			self.push_char()
-			return token.RIGHTPAREN
+			return my_token.RIGHTPAREN
 		if self.cur_char == "[":
 			self.push_char()
-			return token.LEFTBRACKET
+			return my_token.LEFTBRACKET
 		if self.cur_char == "]":
 			self.push_char()
-			return token.RIGHTBRACKET
+			return my_token.RIGHTBRACKET
 		if isDigit(self.cur_char):
 			while isDigit(self.cur_char):
 				self.push_char()
@@ -119,23 +119,23 @@ class scanner:
 				self.push_char()
 				while isDigit(self.cur_char):
 					self.push_char()
-				return token.FLOATLITERAL
-			return token.INTLITERAL
+				return my_token.FLOATLITERAL
+			return my_token.INTLITERAL
 		if isAlpha(self.cur_char):
 			while isDigit(self.cur_char) or isAlpha(self.cur_char):
 				self.push_char()
-			if self.cur_token.upper() in token.keywords:
-				return token.keywords[self.cur_token.upper()]
-			return token.ID
+			if self.cur_token.upper() in my_token.keywords:
+				return my_token.keywords[self.cur_token.upper()]
+			return my_token.ID
 		if self.cur_char == '"':
 			self.push_char()
 			while self.cur_char != '"':
 				if self.cur_char == "$":
 					cur_token = "Not Terminated String"
-					return token.ERROR
+					return my_token.ERROR
 				self.push_char()
-			return token.STRINGLITERAL
+			return my_token.STRINGLITERAL
 
 		self.cur_token = "Unexpected Token" + " " + self.cur_char
-		return token.ERROR
+		return my_token.ERROR
 		
