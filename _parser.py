@@ -49,8 +49,8 @@ class Condition:
 
 ## modified by JYH
 class parser:
-	Scanner = _scanner.scanner()
 	def __init__(self):
+		self.Scanner = _scanner.scanner()
 		self.my_redis = redis.Redis(host='localhost', port=6379, db=0) # redis connector
 		return
 
@@ -61,7 +61,7 @@ class parser:
 		if self.current_token.kind == expected_token_kind:
 			self.current_token = self.Scanner.get_next_token()
 		else:
-			raise ValueError('Error : Expected Token Type : {}'.format(expected_token_kind), 'Instead : {}'.format(self.current_token.content))
+			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format(my_token.token_list[expected_token_kind], self.current_token.content))
 
 	####################################################
 	# in redis, I defined KEY string format as shown below
@@ -84,7 +84,7 @@ class parser:
 			# there must be some redis commands...
 		elif self.current_token.kind == my_token.INSERT:
 			result = self.parseInsertstmt()
-			self.my_redis.rpush(result.table_name, result.values) # in redis, RPUSH key value [value ...]
+			self.my_redis.rpush(result.table_name, *result.values) # in redis, RPUSH key value [value ...]
 			print("insert complete")
 		elif self.current_token.kind == my_token.SELECT:
 			result = self.parseSelectstmt()
@@ -92,8 +92,9 @@ class parser:
 			if result.table_attributes == "*":
 				col_nr = self.my_redis.hlen(result.table_name+":metadata")
 				cell_nr = self.my_redis.llen(result.table_name)
-				for i in range(cell_nr/col_nr):
-					self.my_redis.lrange(result.table_name, col_nr*i, col_nr*(i+1)) # in redis, LRANGE key start stop
+				for i in range(cell_nr//col_nr):
+					output = self.my_redis.lrange(result.table_name, col_nr*i, col_nr*(i+1)-1) # in redis, LRANGE key start stop
+					print(output)
 
 			print("select complete")
 			# there must be some redis commands...
@@ -102,11 +103,11 @@ class parser:
 			# there must be some redis commands...
 		elif self.current_token.kind == my_token.DELETE:
 			result = self.parseDeletestmt()
-			self.my_redis.delete(result.table_name) # in redis, DEL key
+			self.my_redis.delete(*result.table_name) # in redis, DEL key
 			print("delete complete")
 			# there must be some redis commands...
 		else:
-			raise ValueError("SyntaxError, unexpected token {} is entered".format(self.current_token.content))
+			raise ValueError("SyntaxError, invalid keyword token \"{}\" is entered".format(self.current_token.content))
 
 
 	# create-stmt := CREATE TABLE identifier "(" vardecls ")" ";"
@@ -124,7 +125,7 @@ class parser:
 	# show-stmt := SHOW TABLES ";"
 	def parseShowstmt(self):
 		self.accept(my_token.SHOW)
-		self.accept(my_token.TABLE) # my_token.TABLES doesn't exist
+		self.accept(my_token.TABLES) # my_token.TABLES doesn't exist
 		self.accept(my_token.SEMICOLON)
 
 	# insert-stmt := INSERT INTO identifier VALUES "(" values ")" ";"
@@ -144,7 +145,8 @@ class parser:
 	def parseSelectstmt(self):
 		self.accept(my_token.SELECT)
 		if self.current_token.kind == my_token.ASTER:
-			table_attributes = "*"
+			table_attributes = self.current_token.content
+			self.acceptIt()
 		else:
 			table_attributes = self.parseIdentifiers()
 		self.accept(my_token.FROM)
@@ -173,7 +175,7 @@ class parser:
 
 		return UpdateStmt(table_name, table_attribute, value, conditions)
 
-	# DELETE FROM identifier ( WHERE conditions )? ";"
+	# delete-stmt := DELETE FROM identifier ( WHERE conditions )? ";"
 	def parseDeletestmt(self):
 		self.accept(my_token.DELETE)
 		self.accept(my_token.FROM)
@@ -253,7 +255,7 @@ class parser:
 
 			return value
 		else:
-			raise ValueError('Error : Expect token type : {}'.format('INTLITERAL or STRINGLITERAL'))
+			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("INTLITERAL or STRINGLITERAL", self.current_token.content))
 
 	# identifiers := identifier ( "," identifier )*
 	def parseIdentifiers(self):
@@ -275,7 +277,7 @@ class parser:
 
 			return identifier
 		else:
-			raise ValueError('Error : Expect token type : {}'.format('ID'))
+			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("ID", self.current_token.content))
 
 	# data-type := INT | VARCHAR
 	def parseDatatype(self):
@@ -285,7 +287,7 @@ class parser:
 
 			return data_type
 		else:
-			raise ValueError('Error : Expect token type : {}'.format('data_type'))
+			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("INT or VARCHAR", self.current_token.content))
 
 	# operator := ">"|"="|"<"|">="|"!="|"<="
 	# my_token.NOTEQ is "<>" or "!=" ?
@@ -301,6 +303,6 @@ class parser:
 
 			return operator
 		else:
-			raise ValueError('Error : Expect token type : {}'.format('operator'))
+			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("operator", self.current_token.content))
 
 

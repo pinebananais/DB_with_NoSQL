@@ -10,16 +10,17 @@ def isAlpha(x):
 
 
 class scanner:
-	source = None
-	cur_token = ""
-	cur_char = " "
-	cur_kind = None
 	def __init__(self):
+		self.source = None
+		self.cur_token = ""
+		self.cur_char = ""
+		self.cur_kind = None
 		return
 
 	def set_source(self, source):
 		self.source = source
 		self.get_next_char()
+
 	def get_next_char(self):
 		if self.source == "":
 			self.cur_char = "$"
@@ -128,12 +129,14 @@ class scanner:
 				return my_token.keywords[self.cur_token.upper()]
 			return my_token.ID
 		if self.cur_char == '"':
-			self.push_char()
+			self.get_next_char()
 			while self.cur_char != '"':
 				if self.cur_char == "$":
 					cur_token = "Not Terminated String"
 					return my_token.ERROR
 				self.push_char()
+			# modified by JYH
+			self.get_next_char()
 			return my_token.STRINGLITERAL
 
 		self.cur_token = "Unexpected Token" + " " + self.cur_char

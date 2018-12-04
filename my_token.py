@@ -8,7 +8,7 @@ class token:
 	def __str__(self):
 		return "Token : {}\t\t, Kind : {}".format(self.content, self.kind)
 
-(ID			, 		# identifier
+(ID			, 		# identifier 0
 BITOR		,		# |
 BITAND		,		# &
 BITXOR		,		# ^
@@ -25,10 +25,10 @@ DIV			,		# /
 MOD			,		# %
 INTLITERAL	,
 FLOATLITERAL,
-STRINGLITERAL,
+STRINGLITERAL,		# 17
 
 # keywords:
-ALL			,
+ALL			,		# 18
 AND			,
 ANY			,
 BETWEEN		,
@@ -43,31 +43,102 @@ TABLE		,
 DROP		,
 FROM		,
 INSERT		,
+INTO		,
+VALUES		,
 SELECT		,
 SHOW		,
+TABLES		,
 UPDATE		,
 WHERE		,
+DELETE		,		# 40
 
 # data types:
-CHAR		,
+CHAR		,		# 41
 VARCHAR		,
 INT 		,
 FLOAT 		,
-DECIMAL		,
+DECIMAL		,		# 45
 
 # punctuation:
-LEFTBRACE 	,	# {
+LEFTBRACE 	,	# { 46
 RIGHTBRACE	,	# }
 LEFTBRACKET	,	# [
 RIGHTBRACKET,	# ]
 LEFTPAREN	,	# (
 RIGHTPAREN	,	# )
 COMMA		,	# ,
-SEMICOLON	,	# ;
+SEMICOLON	,	# ; 53
 
 # special tokens:
 ERROR		,
-EOF)		= range(52)   # end-of-file
+EOF)		= range(56)   # end-of-file
+
+token_list = [
+"ID", 		# identifier 0
+"BITOR",		# |
+"BITAND",		# &
+"BITXOR",		# ^
+"EQ",		# =
+"NOTEQ",		# <>
+"LESSEQ",		# <=
+"LESS",		# <
+"GREATER",		# >
+"GREATEREQ",		# >=
+"PLUS",		# +
+"MINUS",		# -
+"ASTER",		# *
+"DIV",		# /
+"MOD",		# %
+"INTLITERAL",
+"FLOATLITERAL",
+"STRINGLITERAL",		# 17
+
+# keywords:
+"ALL",		# 18
+"AND",
+"ANY",
+"BETWEEN",
+"EXISTS",
+"IN",
+"LIKE",
+"NOT",
+"OR",
+"SOME",
+"CREATE",
+"TABLE",
+"DROP",
+"FROM",
+"INSERT",
+"INTO",
+"VALUES",
+"SELECT",
+"SHOW",
+"TABLES",
+"UPDATE",
+"WHERE"	,
+"DELETE",		# 40
+
+# data types:
+"CHAR",		# 41
+"VARCHAR",
+"INT",
+"FLOAT",
+"DECIMAL",		# 45
+
+# punctuation:
+"LEFTBRACE" ,	# { 46
+"RIGHTBRACE",	# }
+"LEFTBRACKET",	# [
+"RIGHTBRACKET",	# ]
+"LEFTPAREN",	# (
+"RIGHTPAREN",	# )
+"COMMA",	# ,
+"SEMICOLON",	# ; 53
+
+# special tokens:
+"ERROR",
+"EOF"
+]
 
 keywords = {"ALL" : ALL,
 			"AND" : AND,
@@ -84,12 +155,16 @@ keywords = {"ALL" : ALL,
 			"DROP" : DROP,
 			"FROM" : FROM,
 			"INSERT" : INSERT,
+			"INTO" : INTO,
+			"VALUES" : VALUES,
 			"SELECT" : SELECT,
 			"SHOW" : SHOW,
+			"TABLES" : TABLES,
 			"UPDATE" : UPDATE,
 			"WHERE" : WHERE,
 			"CHAR" : CHAR,
 			"VARCHAR" : VARCHAR,
 			"INT" : INT,
 			"FLOAT" : FLOAT,
-			"DECIMAL" : DECIMAL}
+			"DECIMAL" : DECIMAL,
+			"DELETE" : DELETE}

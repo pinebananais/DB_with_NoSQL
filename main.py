@@ -14,8 +14,8 @@ single_quote_flag = False
 double_quote_flag = False
 result = None
 while True:
-
 	input_string = input(">> ")
+	print("my input: " + input_string)
 	for ch in input_string:
 		if single_quote_flag and ch == "'":
 			single_quote_flag = False
@@ -26,7 +26,7 @@ while True:
 			double_quote_flag = False
 			code += ch
 		elif double_quote_flag:
-			cpde += ch
+			code += ch
 		elif ch == "'":
 			single_quote_flag = True
 			code += ch
@@ -37,10 +37,8 @@ while True:
 			code += ch
 			try:
 				Parser.parse(code)
-				# for x in result:
-				# 	print(x)
 			except ValueError as err:
-				print(err.args)
+				print(err)
 			code = ""
 		else:
 			code += ch 
