@@ -77,18 +77,28 @@ class parser:
 		self.current_token = self.Scanner.get_next_token()
 		if self.current_token.kind == my_token.CREATE:
 			result = self.parseCreatestmt()
+
+			# there must be some redis commands...
 			self.my_redis.hmset(result.table_name+":metadata", result.table_informations) # in redis, HMSET key field value [field value ...]
-			print("create complete")
+			output = self.my_redis.scan(match="*:metadata")
+			print(output)
 		elif self.current_token.kind == my_token.SHOW:
 			self.parseShowstmt()
+
 			# there must be some redis commands...
+			output = self.my_redis.scan(match="*:metadata")
+			print(output)
 		elif self.current_token.kind == my_token.INSERT:
 			result = self.parseInsertstmt()
+
 			self.my_redis.rpush(result.table_name, *result.values) # in redis, RPUSH key value [value ...]
-			print("insert complete")
+			col_nr = self.my_redis.hlen(result.table_name+":metadata")
+			cell_nr = self.my_redis.llen(result.table_name)
+			print("INSERT SUCCESS: TABLE {0} has {1} rows.".format(result.table_name, cell_nr//col_nr))
 		elif self.current_token.kind == my_token.SELECT:
 			result = self.parseSelectstmt()
 
+			# there must be some redis commands...
 			if result.table_attributes == "*":
 				col_nr = self.my_redis.hlen(result.table_name+":metadata")
 				cell_nr = self.my_redis.llen(result.table_name)
@@ -97,7 +107,6 @@ class parser:
 					print(output)
 
 			print("select complete")
-			# there must be some redis commands...
 		elif self.current_token.kind == my_token.UPDATE:
 			result = self.parseUpdatestmt()
 			# there must be some redis commands...
