@@ -1,6 +1,28 @@
 # DB_with_NoSQL
 > database project : stimulate DB with NOSQL
 
+## How to (re)compile Redis source code
+
+https://redis.io/download
+if you failed to compile, you should check redis-5.0.2/deps directory and make all of them first.
+
+## How to run Redis server
+
+in bash, enter commands as shown below.
+
+cd redis-5.0.2
+src/redis-server
+
+## How to run Redis Client (for debug)
+
+in bash, enter commands as shown below.
+
+cd redis-5.0.2
+src/redis-cli
+
+redis command is provided at
+https://redis.io/commands
+
 ## How to Use
 
 In hard-coded main.py, the parser will automatically parse your code.
@@ -9,37 +31,49 @@ When a parser calls parse method, it will return a list that have separated toke
 ## Command EBNF
 
 Command
-> Show | Create | Insert | Select | Update | Delete
+> show-stmt | create-stmt | insert-stmt | select-stmt | update-stmt | delete-stmt
 
-Show
+show-stmt
 > **SHOW TABLES ";"**
 
-Create
-> **CREATE TABLE** identifier **"("** Vardecl ( **","** Vardecl )* **")" ";"**
+create-stmt
+> **CREATE TABLE** identifier **"("** vardecls **")" ";"**
 
-Insert
-> **INSERT INTO** identifier **VALUES "("** Value ( **","** Value )* **")" ";"**
+insert-stmt
+> **INSERT INTO** identifier **VALUES "("** values **")" ";"**
 
-Select
-> **SELECT** ( __"*"__ | identifier ( **","** identifier )* ) **FROM** identifier ( **Where** Conditions )? **";"**
+select-stmt
+> **SELECT** ( __"*"__ | identifiers ) **FROM** identifier ( **Where** Conditions )? **";"**
 
-Update
+update-stmt
 > **UPDATE** identifier **SET** identifier **"="** Value ( **WHERE** Conditions )? **";"** 
 
-Delete
+delete-stmt
 > **DELETE FROM** identifier ( **WHERE** Conditions )? **";"**
 
-Vardecl
+vardecls
+> vardecl ( **","** vardecl )*
+
+vardecl
 > identifier Data-type
 
-Conditions
+values
+> value ( **","** value )*
+
+value
+> **INTLITERAL** | **STRINGLITERAL**
+
+conditions
 > Condition ( ( **"and"** | **"or"** ) Condition )*
 
-Condition
-> identifier filter Value | "(" Conditions ")"
+condition
+> identifier operator Value | "(" Conditions ")"
 
-filter
+operator
 > ( **">"** | **"="** | **"<"** | **">="** | **"!="** | **"<="** )
+
+identifiers
+> identifier ( **","** identifier )*
 
 identifier
 > **alphabet** ( **alphabet** | **digit** )*
