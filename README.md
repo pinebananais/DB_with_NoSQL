@@ -40,34 +40,34 @@ create-stmt
 > **CREATE TABLE** identifier **"("** vardecls **")" ";"**
 
 insert-stmt
-> **INSERT INTO** identifier **VALUES "("** values **")" ";"**
+> **INSERT INTO** identifier **VALUES "("** literals **")" ";"**
 
 select-stmt
-> **SELECT** ( __"*"__ | identifiers ) **FROM** identifier ( **Where** Conditions )? **";"**
+> **SELECT** ( __"*"__ | identifiers ) **FROM** identifier ( **Where** clause )? **";"**
 
 update-stmt
-> **UPDATE** identifier **SET** identifier **"="** Value ( **WHERE** Conditions )? **";"** 
+> **UPDATE** identifier **SET** identifier **"="** literal ( **WHERE** clause )? **";"** 
 
 delete-stmt
-> **DELETE FROM** identifier ( **WHERE** Conditions )? **";"**
+> **DELETE FROM** identifier ( **WHERE** clause )? **";"**
 
 vardecls
 > vardecl ( **","** vardecl )*
 
 vardecl
-> identifier Data-type
+> identifier datatype
 
-values
+literals
 > value ( **","** value )*
 
 value
 > **INTLITERAL** | **STRINGLITERAL**
 
-conditions
-> Condition ( ( **"and"** | **"or"** ) Condition )*
+clauses
+> clause ( ( "and" | "or" ) clauses )? | "(" clauses ")"
 
-condition
-> identifier operator Value | "(" Conditions ")"
+clause
+> identifier filter literal
 
 operator
 > ( **">"** | **"="** | **"<"** | **">="** | **"!="** | **"<="** )
@@ -78,8 +78,8 @@ identifiers
 identifier
 > **alphabet** ( **alphabet** | **digit** )*
 
-Data-type
+datatype
 > **INT** | **VARCHAR**
 
-Value
+literal
 > **INTLITERAL** | **STRINGLITERAL**
