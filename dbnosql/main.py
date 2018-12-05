@@ -1,6 +1,5 @@
-import _scanner
-import my_token
-import _parser
+# import sql_parser
+import redis_connector
 
 print("\n\n")
 print("--------------------------------------")
@@ -8,7 +7,8 @@ print("| Welcome to DB Stimulation Program! |")
 print("--------------------------------------")
 print("\n\n")
 print("Enter SQL Statements:")
-Parser = _parser.parser()
+conn = redis_connector.RedisConnector()
+# Parser = sql_parser.Parser()
 code = ""
 single_quote_flag = False
 double_quote_flag = False
@@ -36,7 +36,8 @@ while True:
 		elif ch == ';':
 			code += ch
 			try:
-				Parser.parse(code)
+				# Parser.parse(code)
+				conn.connect(code)
 			except ValueError as err:
 				print(err)
 			code = ""

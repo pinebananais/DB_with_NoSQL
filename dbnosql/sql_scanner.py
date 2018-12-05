@@ -1,4 +1,4 @@
-import my_token
+import sql_token
 
 space_char = {' ', '\t', '\n', '\r'}
 
@@ -33,7 +33,7 @@ class scanner:
 		self.get_next_char()
 
 	def send_cur_token(self):
-		ret = my_token.token(self.cur_kind, self.cur_token)
+		ret = sql_token.token(self.cur_kind, self.cur_token)
 		self.cur_token = ""
 		return ret
 
@@ -46,73 +46,73 @@ class scanner:
 	def scan(self):
 		if self.cur_char == "$":
 			self.push_char()
-			return my_token.EOF
+			return sql_token.EOF
 		if self.cur_char == "+":
 			self.push_char()
-			return my_token.PLUS
+			return sql_token.PLUS
 		if self.cur_char == "-":
 			self.push_char()
-			return my_token.MINUS
+			return sql_token.MINUS
 		if self.cur_char == "*":
 			self.push_char()
-			return my_token.ASTER
+			return sql_token.ASTER
 		if self.cur_char == "/":
 			self.push_char()
-			return my_token.DIV
+			return sql_token.DIV
 		if self.cur_char == "%":
 			self.push_char()
-			return my_token.MOD
+			return sql_token.MOD
 		if self.cur_char == "&":
 			self.push_char()
-			return my_token.BITAND
+			return sql_token.BITAND
 		if self.cur_char == "|":
 			self.push_char()
-			return my_token.BITOR
+			return sql_token.BITOR
 		if self.cur_char == "^":
 			self.push_char()
-			return my_token.BITXOR
+			return sql_token.BITXOR
 		if self.cur_char == ",":
 			self.push_char()
-			return my_token.COMMA
+			return sql_token.COMMA
 		if self.cur_char == ";":
 			self.push_char()
-			return my_token.SEMICOLON
+			return sql_token.SEMICOLON
 		if self.cur_char == ">":
 			self.push_char()
 			if self.cur_char == "=":
 				self.push_char()
-				return my_token.GREATEREQ
-			return my_token.GREATER
+				return sql_token.GREATEREQ
+			return sql_token.GREATER
 		if self.cur_char == "<":
 			self.push_char()
 			if self.cur_char == "=":
 				self.push_char()
-				return my_token.LESSEQ
+				return sql_token.LESSEQ
 			if self.cur_char == ">":
 				self.push_char()
-				return my_token.NOTEQ
-			return my_token.LESS
+				return sql_token.NOTEQ
+			return sql_token.LESS
 		if self.cur_char == "=":
 			self.push_char()
-			return my_token.EQ
+			return sql_token.EQ
 		if self.cur_char == "{":
 			self.push_char()
-			return my_token.LEFTBRACE
+			return sql_token.LEFTBRACE
 		if self.cur_char == "}":
 			self.push_char()
-			return my_token.RIGHTBRACE
+			return sql_token.RIGHTBRACE
 		if self.cur_char == "(":
 			self.push_char()
-			return my_token.LEFTPAREN
+			return sql_token.LEFTPAREN
 		if self.cur_char == ")":
 			self.push_char()
-			return my_token.RIGHTPAREN
+			return sql_token.RIGHTPAREN
 		if self.cur_char == "[":
 			self.push_char()
-			return my_token.LEFTBRACKET
+			return sql_token.LEFTBRACKET
 		if self.cur_char == "]":
 			self.push_char()
-			return my_token.RIGHTBRACKET
+			return sql_token.RIGHTBRACKET
 		if isDigit(self.cur_char):
 			while isDigit(self.cur_char):
 				self.push_char()
@@ -120,25 +120,25 @@ class scanner:
 				self.push_char()
 				while isDigit(self.cur_char):
 					self.push_char()
-				return my_token.FLOATLITERAL
-			return my_token.INTLITERAL
+				return sql_token.FLOATLITERAL
+			return sql_token.INTLITERAL
 		if isAlpha(self.cur_char):
 			while isDigit(self.cur_char) or isAlpha(self.cur_char):
 				self.push_char()
-			if self.cur_token.upper() in my_token.keywords:
-				return my_token.keywords[self.cur_token.upper()]
-			return my_token.ID
+			if self.cur_token.upper() in sql_token.keywords:
+				return sql_token.keywords[self.cur_token.upper()]
+			return sql_token.ID
 		if self.cur_char == '"':
 			self.get_next_char()
 			while self.cur_char != '"':
 				if self.cur_char == "$":
 					cur_token = "Not Terminated String"
-					return my_token.ERROR
+					return sql_token.ERROR
 				self.push_char()
 			# modified by JYH
 			self.get_next_char()
-			return my_token.STRINGLITERAL
+			return sql_token.STRINGLITERAL
 
 		self.cur_token = "Unexpected Token" + " " + self.cur_char
-		return my_token.ERROR
+		return sql_token.ERROR
 		
