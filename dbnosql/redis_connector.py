@@ -11,56 +11,97 @@ class RedisConnector:
 		self.printTableList()
 
 	def createCommand(self, stmt):
-		self.connector.hmset(stmt.getMetaTableName(), stmt.getTableinfo()) # in redis, HMSET key field value [field value ...]
+		meta_table_name = stmt.getMetaTableName()
+		table_info = stmt.getTableinfo()
+
+		self.connector.hmset(meta_table_name, table_info) # in redis, HMSET key field value [field value ...]
+		
 		self.printTableList()
 
 	def insertCommand(self, stmt):
-		col_nr = self.connector.hlen(stmt.getMetaTableName())
-		if col_nr == 0:
-			raise ValueError("SemanticError, Can not insert into nonexistent table")
+		meta_table_name = stmt.getMetaTableName()
+		table_name = stmt.getTableName()
 
-		literal_nr = len(stmt.literals)
-		if col_nr != literal_nr:
-			raise ValueError("SemanticError, the number of literals and attributes doesn't match")
+		table_col = self.connector.hlen(meta_table_name)
+		if table_col == 0:
+			raise ValueError("SemanticError, Cannot insert into non-existent table")
 
-		data_types = self.connector.hvals(stmt.getMetaTableName())
-		for i in range(len(data_types)):
-			if stmt.literals[i].data_type.getToStr() != data_types[i].decode():
-				raise ValueError("SemanticError, the type of literal and attribute doesn't match in index {0}".format(i))
+		stmt_col = len(stmt.getLiterals())
+		if table_col != stmt_col:
+			raise ValueError("SemanticError, the number of literals and table attributes doesn't match")
 
-		self.connector.rpush(stmt.getTableName(), *stmt.getLiterals())
-		cell_nr = self.connector.llen(stmt.getTableName())
-		print("INSERT SUCCESS: TABLE {0} has {1} rows.".format(stmt.getTableName(), cell_nr//col_nr))
+		table_types = self.connector.hvals(meta_table_name)
+		table_types = [i.decode() for i in table_types]
+		stmt_types = stmt.getLiteralTypes()
+		if table_types != [i for i,j in zip(table_types, stmt_types) if i == j]:
+			raise ValueError("SemanticError, the type of literal and attribute doesn't match")
+
+		self.connector.rpush(table_name, *stmt.getLiterals())
+		table_cell = self.connector.llen(table_name)
+
+		print("INSERT SUCCESS: TABLE {0} has {1} rows.".format(table_name, table_cell//table_col))
 
 	def selectCommand(self, stmt):
-		if stmt.table_attributes == "*":
-			col_nr = self.connector.hlen(stmt.getMetaTableName())
-			if col_nr == 0:
-				raise ValueError("SemanticError, Can not select from nonexistent table")
-			cell_nr = self.connector.llen(stmt.getTableName())
+		meta_table_name = stmt.getMetaTableName()
+		table_name = stmt.getTableName()
 
-			print("=================")
-			attributes = self.connector.hkeys(stmt.getMetaTableName())
-			for attribute in attributes:
-				print(attribute.decode()+"|", end="")
+		table_col = self.connector.hlen(meta_table_name)
+		if table_col == 0:
+			raise ValueError("SemanticError, Cannot select from non-existent table")
+		table_cell = self.connector.llen(table_name)
+
+		table_attrs = self.connector.hkeys(meta_table_name)
+		table_attrs = [i.decode() for i in table_attrs]
+
+		stmt_attrs = stmt.getAttributes()
+		if stmt_attrs == "*":
+			stmt_attrs = table_attrs
+
+		if [i for i in stmt_attrs if i not in table_attrs]:
+			raise ValueError("SemanticError, Cannot select non-existent attribute")
+
+		print("=================")
+		for attr in [i for i in stmt_attrs if i in table_attrs]:
+			print(attr, end="|")
+		print()
+		print("=================")
+		for i in range(table_cell//table_col):
+			for j in [table_attrs.index(i) for i in stmt_attrs if i in table_attrs]:
+				element = self.connector.lindex(table_name, table_col*i+j)
+				element = element.decode()
+				print(element, end="|")
 			print()
-			print("=================")
-			for i in range(cell_nr//col_nr):
-				record = self.connector.lrange(stmt.getTableName(), col_nr*i, col_nr*(i+1)-1) # in redis, LRANGE key start stop
-				for element in record:
-					print(element.decode()+"|", end="")
-				print()
-			print("=================")
-		else:
-			print("SystemError, your query is perfect but we only support 'select * from <table_name>' now.")
+		print("=================")
 
 	def updateCommand(self, stmt):
-		print("SystemError, your query is perfect but we doesn't Support UPDATE query yet.")
+		meta_table_name = stmt.getMetaTableName()
+		table_name = stmt.getTableName()
+
+		table_col = self.connector.hlen(meta_table_name)
+		if table_col == 0:
+			raise ValueError("SemanticError, Cannot select from non-existent table")
+		table_cell = self.connector.llen(table_name)
+
+		table_attrs = self.connector.hkeys(meta_table_name)
+		table_attrs = [i.decode() for i in table_attrs]
+
+		stmt_attr = stmt.getAttribute()
+		stmt_literal = stmt.getLiteral()
+
+		for i in range(table_cell//table_col):
+			j = table_attrs.index(stmt_attr)
+			self.connector.lset(table_name, table_col*i+j, stmt_literal)
+
+		print("UPDATE SUCCESS: TABLE {0} has been updated.".format(table_name))
 
 	def deleteCommand(self, stmt):
-		delete_key = [stmt.getMetaTableName(), stmt.getTableName()] 
+		meta_table_name = stmt.getMetaTableName()
+		table_name = stmt.getTableName()
+
+		delete_key = [meta_table_name, table_name] 
 		self.connector.delete(*delete_key) # in redis, DEL key
-		print("DELETE SUCCESS: TABLE {0} has been deleted.".format(stmt.getTableName()))
+
+		print("DELETE SUCCESS: TABLE {0} has been deleted.".format(table_name))
 
 	def printTableList(self):
 		output = self.connector.scan(match="*:metadata")

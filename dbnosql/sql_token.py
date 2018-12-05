@@ -49,6 +49,7 @@ SELECT		,
 SHOW		,
 TABLES		,
 UPDATE		,
+SET 		,
 WHERE		,
 DELETE		,		# 40
 
@@ -71,7 +72,7 @@ SEMICOLON	,	# ; 53
 
 # special tokens:
 ERROR		,
-EOF)		= range(56)   # end-of-file
+EOF)		= range(57)   # end-of-file
 
 token_list = [
 "ID", 		# identifier 0
@@ -115,6 +116,7 @@ token_list = [
 "SHOW",
 "TABLES",
 "UPDATE",
+"SET",
 "WHERE"	,
 "DELETE",		# 40
 
@@ -161,6 +163,7 @@ keywords = {"ALL" : ALL,
 			"SHOW" : SHOW,
 			"TABLES" : TABLES,
 			"UPDATE" : UPDATE,
+			"SET" : SET,
 			"WHERE" : WHERE,
 			"CHAR" : CHAR,
 			"VARCHAR" : VARCHAR,

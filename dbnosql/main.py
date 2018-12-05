@@ -1,4 +1,4 @@
-# import sql_parser
+import sys
 import redis_connector
 
 print("\n\n")
@@ -14,32 +14,34 @@ single_quote_flag = False
 double_quote_flag = False
 result = None
 while True:
-	input_string = input(">> ")
-	for ch in input_string:
-		if single_quote_flag and ch == "'":
-			single_quote_flag = False
-			code += ch
-		elif single_quote_flag:
-			code += ch
-		elif double_quote_flag and ch =='"':
-			double_quote_flag = False
-			code += ch
-		elif double_quote_flag:
-			code += ch
-		elif ch == "'":
-			single_quote_flag = True
-			code += ch
-		elif ch == '"':
-			double_quote_flag = True
-			code += ch
-		elif ch == ';':
-			code += ch
-			try:
-				# Parser.parse(code)
+	try:
+		input_string = input(">> ")
+		for ch in input_string:
+			if single_quote_flag and ch == "'":
+				single_quote_flag = False
+				code += ch
+			elif single_quote_flag:
+				code += ch
+			elif double_quote_flag and ch =='"':
+				double_quote_flag = False
+				code += ch
+			elif double_quote_flag:
+				code += ch
+			elif ch == "'":
+				single_quote_flag = True
+				code += ch
+			elif ch == '"':
+				double_quote_flag = True
+				code += ch
+			elif ch == ';':
+				code += ch
 				conn.connect(code)
-			except ValueError as err:
-				print(err)
-			code = ""
-		else:
-			code += ch 
-
+				print()
+				code = ""
+			else:
+				code += ch 
+	except ValueError as err:
+		print(err)
+	except KeyboardInterrupt:
+		print("\nDB Simulation program would be terminated. Good Bye!")
+		sys.exit()

@@ -34,11 +34,26 @@ class InsertStmt(Stmt):
 			result.append(literal.getToStr())
 		return result
 
+	def getLiteralTypes(self):
+		result = list()
+		for literal in self.literals:
+			result.append(literal.data_type.getToStr())
+		return result
+
 class SelectStmt(Stmt):
 	def __init__(self, table_attributes, table_name, clauses):
 		super().__init__(table_name) # ID
-		self.table_attributes = table_attributes # list of ID
+		self.table_attributes = table_attributes # list of ID or "*"
 		self.clauses = clauses  # Clauses
+
+	def getAttributes(self):
+		if self.table_attributes == '*':
+			return str("*")
+		else:
+			result = list()
+			for attribute in self.table_attributes:
+				result.append(attribute.getToStr())
+			return result
 
 class UpdateStmt(Stmt):
 	def __init__(self, table_name, table_attribute, literal, clauses):
@@ -46,6 +61,12 @@ class UpdateStmt(Stmt):
 		self.table_attribute = table_attribute # ID
 		self.literal = literal # Literal
 		self.clauses = clauses # Clauses
+
+	def getAttribute(self):
+		return self.table_attribute.getToStr()
+
+	def getLiteral(self):
+		return self.literal.getToStr()
 
 class DeleteStmt(Stmt):
 	def __init__(self, table_name, clauses):

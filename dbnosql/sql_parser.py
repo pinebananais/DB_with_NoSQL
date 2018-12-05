@@ -92,7 +92,7 @@ class Parser:
 	# update-stmt := UPDATE identifier SET identifier "=" literal ( WHERE clauses )? ";"
 	def parseUpdatestmt(self):
 		self.accept(sql_token.UPDATE)
-		table_name = self.parseIdentifiers()
+		table_name = self.parseIdentifier()
 		self.accept(sql_token.SET) # sql_token.SET doen't exist !!!!!!!!!!!
 		table_attribute = self.parseIdentifier()
 		self.accept(sql_token.EQ) # ASSIGN?, EQ?
@@ -117,35 +117,6 @@ class Parser:
 		self.accept(sql_token.SEMICOLON)
 
 		return DeleteStmt(table_name, clauses)
-
-	# clauses := clause ( ("and"|"or") clause )*
-	# def parseClauses(self):
-	# 	clauses = Clauses()
-	# 	r_clause = parseClause(clauses)
-	# 	clauses.right = r_clause
-	# 	while self.current_token.kind == sql_token.AND or self.current_token.kind == sql_token.OR:
-	# 		clauses.and_or = self.current_token.content
-	# 		self.acceptIt()
-	# 		l_clause = parseClause(clauses)
-	# 		clauses.left = l_clause
-
-	# 	return clauses
-
-	# clause := identifier filter value | "(" clauses ")"
-	# def parseClause(self, parent_clauses):
-	# 	if self.current_token.kind == sql_token.ID:
-	# 		table_attribute = parseIdentifier()
-	# 		operator = parseOperator()
-	# 		literal = parseLiteral()
-
-	# 		return Clause(table_attribute, operator, literal)
-	# 	elif self.current_token.kind == sql_token.LEFTPAREN:
-	# 		self.acceptIt()
-	# 		clauses = parseClauses()
-	# 		clauses.parent = parent_clauses
-	# 		self.accept(sql_token.RIGHTPAREN)
-
-	# 		return clauses
 
 	# clauses := clause ( ( "and" | "or" ) clauses )? | "(" clauses ")"
 	def parseClauses(self):
