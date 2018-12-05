@@ -165,7 +165,7 @@ class Parser:
 
 			return Clauses(left, and_or, right)
 
-	# clause := identifier filter value
+	# clause := identifier filter literal
 	def parseClause(self):
 		table_attribute = parseIdentifier()
 		operator = parseOperator()
