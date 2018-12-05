@@ -15,7 +15,6 @@ double_quote_flag = False
 result = None
 while True:
 	input_string = input(">> ")
-	print("my input: " + input_string)
 	for ch in input_string:
 		if single_quote_flag and ch == "'":
 			single_quote_flag = False

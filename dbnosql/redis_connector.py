@@ -7,6 +7,17 @@ class RedisConnector:
 		self.parser = sql_parser.Parser()
 		self.connector = redis.Redis(host='localhost', port=6379, db=0) # redis connector
 
+	def printTableList(self):
+		output = self.connector.scan(match="*:metadata")
+		tables = output[1]
+
+		print("=================")
+		print("Table list")
+		print("=================")
+		for table in tables:
+			print(table.split(b':')[0].decode())
+		print("=================")
+
 	####################################################
 	# in redis, I defined KEY string format as shown below
 	# KEY of the container including table records = table_name
@@ -20,17 +31,24 @@ class RedisConnector:
 		stmt = self.parser.parse(source)
 
 		if type(stmt) is CreateStmt:
-			self.connector.hmset(stmt.table_name+":metadata", stmt.table_informations) # in redis, HMSET key field value [field value ...]
-			output = self.connector.scan(match="*:metadata")
-			print(output[1])
+			self.connector.hmset(stmt.getTableName()+":metadata", stmt.getTableinfo()) # in redis, HMSET key field value [field value ...]
+			self.printTableList()
 		elif type(stmt) is ShowStmt:
-			output = self.connector.scan(match="*:metadata")
-			print(output[1])
+			self.printTableList()
 		elif type(stmt) is InsertStmt:
-			self.connector.rpush(stmt.table_name, *stmt.values) # in redis, RPUSH key value [value ...]
-			col_nr = self.connector.hlen(stmt.table_name+":metadata")
-			cell_nr = self.connector.llen(stmt.table_name)
-			print("INSERT SUCCESS: TABLE {0} has {1} rows.".format(stmt.table_name, cell_nr//col_nr))
+			print(stmt.literals)
+			col_nr = self.connector.hlen(stmt.getTableName()+":metadata")
+
+			if col_nr == 0:
+				raise ValueError("SemanticError, Can not insert into nonexistent table")
+			else:
+				literal_nr = len(stmt.literals)
+
+				if col_nr != literal_nr
+					raise ValueError("SemanticError, the number of literals and attributes doesn't match")
+			# self.connector.rpush(stmt.table_name, *stmt.values) # in redis, RPUSH key value [value ...]
+			# cell_nr = self.connector.llen(stmt.table_name)
+			# print("INSERT SUCCESS: TABLE {0} has {1} rows.".format(stmt.table_name, cell_nr//col_nr))
 		elif type(stmt) is SelectStmt:
 			if stmt.table_attributes == "*":
 				col_nr = self.connector.hlen(stmt.table_name+":metadata")

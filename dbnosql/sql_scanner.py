@@ -8,8 +8,7 @@ def isDigit(x):
 def isAlpha(x):
 	return ('a' <= x <= 'z') or ('A' <= x <= 'Z') or x == '_'
 
-
-class scanner:
+class Scanner:
 	def __init__(self):
 		self.source = None
 		self.cur_token = ""
