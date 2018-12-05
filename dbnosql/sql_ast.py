@@ -5,11 +5,14 @@ class Stmt:
 	def getTableName(self):
 		return self.table_name.getToStr()
 
+	def getMetaTableName(self):
+		return self.table_name.getToStr() + ":metadata"
+
 class CreateStmt(Stmt):
 	def __init__(self, table_name, table_informations):
-		super().__init__(table_name)
+		super().__init__(table_name) # ID
 		self.table_informations = table_informations # list of VarDecl
-		
+
 	def getTableinfo(self):
 		result = dict()
 		for table_info in self.table_informations:
@@ -22,25 +25,31 @@ class ShowStmt(Stmt):
 
 class InsertStmt(Stmt):
 	def __init__(self, table_name, literals):
-		super().__init__(table_name)
+		super().__init__(table_name) # ID
 		self.literals = literals # list of Literal
+
+	def getLiterals(self):
+		result = list()
+		for literal in self.literals:
+			result.append(literal.getToStr())
+		return result
 
 class SelectStmt(Stmt):
 	def __init__(self, table_attributes, table_name, clauses):
-		super().__init__(table_name)
+		super().__init__(table_name) # ID
 		self.table_attributes = table_attributes # list of ID
 		self.clauses = clauses  # Clauses
 
 class UpdateStmt(Stmt):
 	def __init__(self, table_name, table_attribute, literal, clauses):
-		super().__init__(table_name)
+		super().__init__(table_name) # ID
 		self.table_attribute = table_attribute # ID
 		self.literal = literal # Literal
 		self.clauses = clauses # Clauses
 
 class DeleteStmt(Stmt):
 	def __init__(self, table_name, clauses):
-		super().__init__(table_name)
+		super().__init__(table_name) # ID
 		self.clauses = clauses # Clauses
 
 class Clauses:
@@ -60,25 +69,26 @@ class VarDecl:
 		self.attribute_name = attribute_name # ID
 		self.attribute_type = attribute_type # Datatype
 
-class Literal:
-	def __init__(self, value, data_type):
-		self.value = value # string (INTLITERAL or STRINGLITERAL)
-		self.data_type = data_type # Datatype
-
-class ID:
+class Terminal:
 	def __init__(self, value):
-		self.value = value # string ( identifier )
+		self.value = value # string
 
 	def getToStr(self):
 		return self.value
 
-class DataType:
-	def __init__(self, type_):
-		self.type = type_ # string ("INT" or "VARCHAR")
+class Literal(Terminal):
+	def __init__(self, value, data_type):
+		super().__init__(value) # string (INTLITERAL or STRINGLITERAL)
+		self.data_type = data_type # Datatype
 
-	def getToStr(self):
-		return self.type
+class ID(Terminal):
+	def __init__(self, value):
+		super().__init__(value) # string ( identifier )
 
-class Operator:
-	def __init__(self, operator_type):
-		self.operator_type = operator_type # string (">"|"="|"<"|">="|"!="|"<=")
+class DataType(Terminal):
+	def __init__(self, value):
+		super().__init__(value) # string ("INT" or "VARCHAR")
+
+class Operator(Terminal):
+	def __init__(self, value):
+		super().__init__(value) # string (">"|"="|"<"|">="|"!="|"<=")
