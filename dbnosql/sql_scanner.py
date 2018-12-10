@@ -125,6 +125,9 @@ class Scanner:
 			while isDigit(self.cur_char) or isAlpha(self.cur_char):
 				self.push_char()
 			if self.cur_token.upper() in sql_token.keywords:
+				# modified YIS 12-10
+				self.cur_token = self.cur_token.upper()
+				# end
 				return sql_token.keywords[self.cur_token.upper()]
 			return sql_token.ID
 		if self.cur_char == '"':

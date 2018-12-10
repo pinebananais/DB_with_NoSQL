@@ -42,6 +42,9 @@ while True:
 				code += ch 
 	except ValueError as err:
 		print(err)
+		# modified by YIS 12-10
+		code = ""
+		# end
 	except KeyboardInterrupt:
 		print("\nDB Simulation program would be terminated. Good Bye!")
 		sys.exit()
