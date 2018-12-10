@@ -62,14 +62,14 @@ class RedisConnector:
 
 		print("=================")
 		for attr in [i for i in stmt_attrs if i in table_attrs]:
-			print(attr, end="|")
+			print(attr, end="\t|")
 		print()
 		print("=================")
 		for i in range(table_cell//table_col):
 			for j in [table_attrs.index(i) for i in stmt_attrs if i in table_attrs]:
 				element = self.connector.lindex(table_name, table_col*i+j)
 				element = element.decode()
-				print(element, end="|")
+				print(element, end="\t|")
 			print()
 		print("=================")
 

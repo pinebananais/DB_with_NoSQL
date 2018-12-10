@@ -3,7 +3,7 @@ import redis_connector
 
 print("\n\n")
 print("--------------------------------------")
-print("| Welcome to DB Stimulation Program! |")
+print("| Welcome to DB Simulation Program! |")
 print("--------------------------------------")
 print("\n\n")
 print("Enter SQL Statements:")
