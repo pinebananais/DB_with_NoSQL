@@ -103,6 +103,18 @@ class RedisConnector:
 
 		print("DELETE SUCCESS: TABLE {0} has been deleted.".format(table_name))
 
+	def dropCommand(self, stmt):
+		meta_table_name = stmt.getMetaTableName()
+		table_name = stmt.getTableName()
+
+		table_col = self.connector.hlen(meta_table_name)
+		if table_col == 0:
+			raise ValueError("SemanticError, Cannot drop non-existent table")
+		delete_key = [meta_table_name, table_name] 
+		self.connector.delete(*delete_key) # in redis, DEL key
+
+		print("DROP SUCCESS: TABLE {0} has been deleted.".format(table_name))
+
 	def printTableList(self):
 		output = self.connector.scan(match="*:metadata")
 		tables = output[1]
@@ -138,5 +150,7 @@ class RedisConnector:
 			self.updateCommand(stmt)
 		elif type(stmt) is DeleteStmt:
 			self.deleteCommand(stmt)
+		elif type(stmt) is DropStmt:
+			self.dropCommand(stmt)
 		else:
 			raise ValueError("SyntaxError, invalid stmt is entered")

@@ -73,6 +73,10 @@ class DeleteStmt(Stmt):
 		super().__init__(table_name) # ID
 		self.clauses = clauses # Clauses
 
+class DropStmt(Stmt):
+	def __init__(self, table_name):
+		super().__init__(table_name)
+
 class Clauses:
 	def __init__(self, left, and_or, right): # binary tree structure
 		self.left = left # Clause

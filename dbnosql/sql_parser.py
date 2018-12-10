@@ -33,6 +33,8 @@ class Parser:
 			result = self.parseUpdatestmt()
 		elif self.current_token.kind == sql_token.DELETE:
 			result = self.parseDeletestmt()
+		elif self.current_token.kind == sql_token.DROP:
+			result = self.parseDropstmt()
 		else:
 			raise ValueError("SyntaxError, invalid keyword token \"{}\" is entered".format(self.current_token.content))
 
@@ -117,6 +119,15 @@ class Parser:
 		self.accept(sql_token.SEMICOLON)
 
 		return DeleteStmt(table_name, clauses)
+	
+	# drop-stmt := DROP TABLE identifier ";"
+	def parseDropstmt(self):
+		self.accept(sql_token.DROP)
+		self.accept(sql_token.TABLE)
+		table_name = self.parseIdentifier()
+		self.accept(sql_token.SEMICOLON)
+		
+		return DropStmt(table_name)
 
 	# clauses := clause ( ( "and" | "or" ) clauses )? | "(" clauses ")"
 	def parseClauses(self):
