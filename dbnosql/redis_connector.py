@@ -66,13 +66,22 @@ class RedisConnector:
 
 		if [i for i in stmt_attrs if i not in table_attrs]:
 			raise ValueError("SemanticError, Cannot select non-existent attribute")
+		
 
+		# modified by YIS 12-11
+		table_row = [i for i in range(table_cell // table_col)]
+		if stmt.clauses != []:
+			print(stmt.clauses.getToList())
+			table_row = self.connector.execute_command('mylrange', meta_table_name, table_name, *stmt.clauses.getToList())
+
+		print(table_row)
+		# end
 		print("=================")
 		for attr in [i for i in stmt_attrs if i in table_attrs]:
 			print(attr, end="\t|")
 		print()
 		print("=================")
-		for i in range(table_cell//table_col):
+		for i in table_row:
 			for j in [table_attrs.index(i) for i in stmt_attrs if i in table_attrs]:
 				element = self.connector.lindex(table_name, table_col*i+j)
 				element = element.decode()

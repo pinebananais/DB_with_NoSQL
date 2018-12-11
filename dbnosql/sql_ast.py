@@ -82,12 +82,23 @@ class Clauses:
 		self.left = left # Clause
 		self.and_or = and_or # string ("and" | "or") or None
 		self.right = right # Clause or None
+	
+	def getToList(self):
+		if self.and_or == "AND":
+			return self.left.getToList() + self.right.getToList() + [self.and_or]
+		elif self.and_or == "OR":
+			return self.left.getToList() + self.right.getToList() + [self.and_or]
+		else :
+			return self.left.getToList()
 
 class Clause:
 	def __init__(self, table_attribute, operator, literal):
 		self.table_attribute = table_attribute # ID
 		self.operator = operator # Operator
 		self.literal = literal # Literal
+
+	def getToList(self):
+		return [self.table_attribute.getToStr(), self.operator.getToStr(), self.literal.getToStr()]
 
 class VarDecl:
 	def __init__(self, attribute_name, attribute_type):

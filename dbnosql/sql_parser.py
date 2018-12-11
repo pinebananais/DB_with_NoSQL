@@ -131,14 +131,14 @@ class Parser:
 
 	# clauses := clause ( ( "and" | "or" ) clauses )? | "(" clauses ")"
 	def parseClauses(self):
-		if self.current_token.kind == sql.token.LEFTPAREN:
+		if self.current_token.kind == sql_token.LEFTPAREN:
 			self.acceptIt()
 			clauses = parseClauses()
 			self.accept(RIGHTPAREN)
 
 			return clauses
-		elif self.current_token.kind == sql.token.ID:
-			left = parseClause()
+		elif self.current_token.kind == sql_token.ID:
+			left = self.parseClause()
 			and_or = None
 			right = None
 			if self.current_token.kind == sql_token.AND or self.current_token.kind == sql_token.OR:
@@ -149,9 +149,9 @@ class Parser:
 
 	# clause := identifier filter literal
 	def parseClause(self):
-		table_attribute = parseIdentifier()
-		operator = parseOperator()
-		literal = parseLiteral()
+		table_attribute = self.parseIdentifier()
+		operator = self.parseOperator()
+		literal = self.parseLiteral()
 		
 		return Clause(table_attribute, operator, literal)
 
