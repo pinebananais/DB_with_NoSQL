@@ -13,6 +13,13 @@ class RedisConnector:
 	def createCommand(self, stmt):
 		meta_table_name = stmt.getMetaTableName()
 		table_info = stmt.getTableinfo()
+		
+		# modified by YIS 12-11
+		table_col = self.connector.hlen(meta_table_name)
+		if table_col != 0:
+			raise ValueError("SemanticError, Cannot create already exist table")
+		# end
+
 
 		self.connector.hmset(meta_table_name, table_info) # in redis, HMSET key field value [field value ...]
 		
