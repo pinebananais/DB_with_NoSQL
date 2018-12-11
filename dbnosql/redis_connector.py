@@ -76,18 +76,21 @@ class RedisConnector:
 
 		print(table_row)
 		# end
-		print("=================")
-		for attr in [i for i in stmt_attrs if i in table_attrs]:
-			print(attr, end="\t|")
+		for i in stmt_attrs : print("=================", end = "")
 		print()
-		print("=================")
+		for attr in [i for i in stmt_attrs if i in table_attrs]:
+			print("%15s" % (attr), end = " |")
+		print()
+		for i in stmt_attrs : print("=================", end = "")
+		print()
 		for i in table_row:
 			for j in [table_attrs.index(i) for i in stmt_attrs if i in table_attrs]:
 				element = self.connector.lindex(table_name, table_col*i+j)
 				element = element.decode()
-				print(element, end="\t|")
+				print("%15s" % (element), end = " |")
 			print()
-		print("=================")
+		for i in stmt_attrs : print("=================", end = "")
+		print()
 
 	def updateCommand(self, stmt):
 		meta_table_name = stmt.getMetaTableName()
