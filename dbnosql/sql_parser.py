@@ -128,7 +128,7 @@ class Parser:
 		self.accept(sql_token.SEMICOLON)
 		
 		return DropStmt(table_name)
-	# modified by YIS 12-13
+	# modified by YIS 12 - 13
 	# clauses := orclauses
 	def parseClauses(self):
 		return self.parseOrclauses()
@@ -175,7 +175,7 @@ class Parser:
 		return Clause(table_attribute, operator, literal)
 
 
-	# end 12-13
+	# end 12 - 13
 
 	# vardecls := vardecl ( "," vardecl )*
 	def parseVardecls(self):
