@@ -64,7 +64,7 @@ DECIMAL		,		# 45
 LEFTBRACE 	,	# { 46
 RIGHTBRACE	,	# }
 LEFTBRACKET	,	# [
-RIGHTBRACKET,	# ]
+RIGHTBRACKET	,	# ]
 LEFTPAREN	,	# (
 RIGHTPAREN	,	# )
 COMMA		,	# ,
@@ -79,17 +79,17 @@ token_list = [
 "BITOR",		# |
 "BITAND",		# &
 "BITXOR",		# ^
-"EQ",		# =
+"EQ",			# =
 "NOTEQ",		# <>
 "LESSEQ",		# <=
-"LESS",		# <
+"LESS",			# <
 "GREATER",		# >
 "GREATEREQ",		# >=
-"PLUS",		# +
+"PLUS",			# +
 "MINUS",		# -
 "ASTER",		# *
-"DIV",		# /
-"MOD",		# %
+"DIV",			# /
+"MOD",			# %
 "INTLITERAL",
 "FLOATLITERAL",
 "STRINGLITERAL",		# 17

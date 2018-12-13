@@ -96,9 +96,9 @@ class Clause:
 		self.table_attribute = table_attribute # ID
 		self.operator = operator # Operator
 		self.literal = literal # Literal
-
+		self.type = 1 if self.literal.data_type == "INT" else 0
 	def getToList(self):
-		return [self.table_attribute.getToStr(), self.operator.getToStr(), self.literal.getToStr()]
+		return [self.table_attribute.getToStr(), self.operator.getToStr(), self.literal.getToStr(), self.type]
 
 class VarDecl:
 	def __init__(self, attribute_name, attribute_type):

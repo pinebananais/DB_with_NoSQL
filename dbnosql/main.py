@@ -2,9 +2,9 @@ import sys
 import redis_connector
 
 print("\n\n")
-print("--------------------------------------")
+print("-------------------------------------")
 print("| Welcome to DB Simulation Program! |")
-print("--------------------------------------")
+print("-------------------------------------")
 print("\n\n")
 print("Enter SQL Statements:")
 conn = redis_connector.RedisConnector()

@@ -453,6 +453,24 @@ long compare_value(long lhs, char *oper, long rhs){
 	if(strcmp(oper, ">=") == 0) return lhs >= rhs;
 }
 
+long pattern_match(const char *s, const char *p) {
+    if(*s == 0 && *p == 0) return 1;
+    if(*p == 0) return 0;
+    if(*p == 37 && *s == 0) return pattern_match(s, p + 1);
+    if(*p == 37) return pattern_match(s, p + 1) || pattern_match(s + 1, p);
+    if(*p == '_' && *s == 0) return 0;
+    if(*p == '_') return pattern_match(s + 1, p + 1);
+    if(*s == 0) return 0;
+	return (*s == *p) && pattern_match(s + 1, p + 1);
+} 
+
+long compare_str(char *lhs, char *oper, char *rhs){
+	printf("in function : %s %s %s\n", lhs, oper, rhs);
+	if(strcmp(oper, "=") == 0) return !(strcmp(lhs, rhs));
+	if(strcmp(oper, "<>") == 0) return strcmp(lhs, rhs);
+	if(strcmp(oper, "LIKE") == 0) return pattern_match(lhs, rhs);
+}
+
 long str2int(char *str){
 	long res = 0;
 	long i;
@@ -462,8 +480,11 @@ long str2int(char *str){
 	}
 	return res;
 }
+void multipredicate(client *c) {
+    
+}
 
-void mylrangeCommand(client *c) { // single pridicate
+void mylrangeCommand(client *c) { // single predicate
 	printf("Entered\n");
     robj *o;
     robj *oh;
@@ -477,6 +498,7 @@ void mylrangeCommand(client *c) { // single pridicate
 	char *arg1 = (char*)c->argv[3]->ptr;
 	char *arg2 = (char*)c->argv[4]->ptr;
 	char *arg3 = (char*)c->argv[5]->ptr;
+	char *arg4 = (char*)c->argv[6]->ptr;
 	printf("first arg : %s\n", arg1);
     long *index_arr = (long*)malloc(sizeof(long) * 10); // result list
     long index = 0; // index # of target attr
@@ -489,7 +511,7 @@ void mylrangeCommand(client *c) { // single pridicate
     	unsigned char rstr[128];
         unsigned int vlen = UINT_MAX;
         long long vll = LLONG_MAX;
-		int what;
+	int what;
         hashTypeCurrentFromZiplist(hi, OBJ_HASH_KEY, &vstr, &vlen, &vll);
         strncpy(rstr, vstr, vlen);
         rstr[vlen] = '\0';
@@ -506,9 +528,18 @@ void mylrangeCommand(client *c) { // single pridicate
 		    if (quicklistIndex(o->ptr, look, &entry)) {
 		        long val = entry.longval;
 		        printf("%s\n", arg3);
-		        if(compare_value(val, arg2, str2int(arg3))){ // if condition satisfied
-		        	index_arr[count++] = i; // accept to result list
-		        }
+				if(arg4[0] == '1'){
+				    if(compare_value(val, arg2, str2int(arg3))){ // if condition satisfied
+				    	index_arr[count++] = i; // accept to result list
+				    }
+				}
+				else{
+					char buff[128] = {0,};
+					strncpy(buff, entry.value, entry.sz);
+					if(compare_str(buff, arg2, arg3)){
+						index_arr[count++] = i; // accept to result list
+					}
+				}
 		    } else {
 		        addReply(c,shared.nullbulk);
 		    }

@@ -128,24 +128,43 @@ class Parser:
 		self.accept(sql_token.SEMICOLON)
 		
 		return DropStmt(table_name)
-
-	# clauses := clause ( ( "and" | "or" ) clauses )? | "(" clauses ")"
+	# modified by YIS 12-13
+	# clauses := orclauses
 	def parseClauses(self):
+		return self.parseOrclauses()
+
+	# or-clauses := and-clauses ("or" or-clauses)?
+	def parseOrclauses(self):
+		lclauses = self.parseAndclauses()
+		and_or = None
+		rclauses = None
+		if self.current_token.kind == sql_token.OR:
+			self.acceptIt()
+			and_or = "OR"
+			rclauses = self.parseOrclauses()
+		return Clauses(lclauses, and_or, rclauses)
+
+	# and-clauses := primary-clause ("and" and-clauses)?
+	def parseAndclauses(self):
+		lclauses = self.parsePrimaryclause()
+		and_or = None
+		rclauses = None
+		if self.current_token.kind == sql_token.AND:
+			self.acceptIt()
+			and_or = "AND"
+			rclauses = self.parseAndclauses()
+		return Clauses(lclauses, and_or, rclauses)
+	
+	# primary-clause := "(" clauses ")" | clause
+	def parsePrimaryclause(self):
 		if self.current_token.kind == sql_token.LEFTPAREN:
 			self.acceptIt()
-			clauses = parseClauses()
-			self.accept(RIGHTPAREN)
-
+			clauses = self.parseClauses()
+			self.accept(sql_token.RIGHTPAREN)
 			return clauses
-		elif self.current_token.kind == sql_token.ID:
-			left = self.parseClause()
-			and_or = None
-			right = None
-			if self.current_token.kind == sql_token.AND or self.current_token.kind == sql_token.OR:
-				and_or = self.current_token.content
-				right = parseClauses()
-
-			return Clauses(left, and_or, right)
+		else :
+			clause = self.parseClause()
+			return Clauses(clause, None, None)
 
 	# clause := identifier filter literal
 	def parseClause(self):
@@ -154,6 +173,9 @@ class Parser:
 		literal = self.parseLiteral()
 		
 		return Clause(table_attribute, operator, literal)
+
+
+	# end 12-13
 
 	# vardecls := vardecl ( "," vardecl )*
 	def parseVardecls(self):
@@ -240,7 +262,8 @@ class Parser:
 		self.current_token.kind == sql_token.LESS or \
 		self.current_token.kind == sql_token.GREATEREQ or \
 		self.current_token.kind == sql_token.NOTEQ or \
-		self.current_token.kind == sql_token.LESSEQ:
+		self.current_token.kind == sql_token.LESSEQ or \
+		self.current_token.kind == sql_token.LIKE:
 			operator_type = self.current_token.content
 			self.acceptIt()
 
