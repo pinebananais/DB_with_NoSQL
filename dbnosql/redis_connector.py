@@ -70,7 +70,7 @@ class RedisConnector:
 
 		# modified by YIS 12-11
 		table_row = [i for i in range(table_cell // table_col)]
-		if stmt.clauses != []:
+		if stmt.clauses:
 			print(stmt.clauses.getToList())
 			table_row = self.connector.execute_command('mylrange', meta_table_name, table_name, *stmt.clauses.getToList())
 
