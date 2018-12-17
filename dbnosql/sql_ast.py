@@ -51,7 +51,7 @@ class SelectStmt(Stmt):
 	def getAttributes(self):
 		if self.table_attributes == '*':
 			return str("*")
-		elif self.table_attributes[0] == "SUM":
+		elif self.table_attributes[0] == "SUM" or self.table_attributes[0] == "COUNT":
 			return self.table_attributes
 		else:
 			result = list()
@@ -121,6 +121,8 @@ class HavingClause:
 		self.aggregation = aggregation # list [SUM or Count, ID]
 		self.operator = operator # Operator
 		self.literal = literal # Literal
+
+	
 
 
 class VarDecl:
