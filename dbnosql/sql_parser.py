@@ -79,6 +79,9 @@ class Parser:
 		if self.current_token.kind == sql_token.ASTER:
 			table_attributes = self.current_token.content
 			self.acceptIt()
+		# modified by HJY 2018-12-16
+		elif self.current_token.kind == sql_token.SUM or self.current_token.kind == sql_token.COUNT:
+			table_attributes = self.parseAggregation()
 		else:
 			table_attributes = self.parseIdentifiers()
 		self.accept(sql_token.FROM)
@@ -87,9 +90,22 @@ class Parser:
 		if self.current_token.kind == sql_token.WHERE:
 			self.acceptIt()
 			clauses = self.parseClauses()
+		# modified by HJY 2018-12-16
+		group = None
+		if self.current_token.kind == sql_token.GROUP:
+			self.acceptIt()
+			if self.current_token.kind == sql_token.BY:
+				self.acceptIt()
+				group = self.parseIdentifier()
+			else:
+				raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("BY", self.current_token.content))
+		having_clause = None
+		if self.current_token.kind == sql_token.HAVING:
+			self.acceptIt()
+			having_clause = self.parseHavingClause()
 		self.accept(sql_token.SEMICOLON)
 
-		return SelectStmt(table_attributes, table_name, clauses)
+		return SelectStmt(table_attributes, table_name, clauses, group, having_clause)
 
 	# update-stmt := UPDATE identifier SET identifier "=" literal ( WHERE clauses )? ";"
 	def parseUpdatestmt(self):
@@ -271,4 +287,26 @@ class Parser:
 		else:
 			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("operator", self.current_token.content))
 
+	# modified by HJY 2018-12-16
+	# aggregation := SUM "(" identifier ")" | COUNT "(" identifier ")"
+	def parseAggregation(self):
+		aggregation = list()
+		if self.current_token.kind == sql_token.SUM:
+			aggregation.append(self.current_token.content)
+			self.acceptIt()
+		elif self.current_token.kind == sql_token.COUNT:
+			aggregation.append(self.current_token.content)
+			self.acceptIt()
+		self.accept(sql_token.LEFTPAREN)
+		identifier = self.parseIdentifier()
+		aggregation.append(identifier)
+		self.accept(sql_token.RIGHTPAREN)
 
+		return aggregation
+
+	def parseHavingClause(self):
+		aggregation = self.parseAggregation()
+		operator = self.parseOperator()
+		literal = self.parseLiteral()
+
+		return HavingClause(aggregation, operator, literal)

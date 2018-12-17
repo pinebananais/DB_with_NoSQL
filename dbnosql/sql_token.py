@@ -51,28 +51,33 @@ TABLES		,
 UPDATE		,
 SET 		,
 WHERE		,
-DELETE		,		# 40
+DELETE		,		
+SUM			,
+COUNT		,
+GROUP		,
+BY			,
+HAVING		,		# 46
 
 # data types:
-CHAR		,		# 41
+CHAR		,		# 47
 VARCHAR		,
 INT 		,
 FLOAT 		,
-DECIMAL		,		# 45
+DECIMAL		,		# 51
 
 # punctuation:
-LEFTBRACE 	,	# { 46
+LEFTBRACE 	,	# { 52
 RIGHTBRACE	,	# }
 LEFTBRACKET	,	# [
 RIGHTBRACKET	,	# ]
 LEFTPAREN	,	# (
 RIGHTPAREN	,	# )
 COMMA		,	# ,
-SEMICOLON	,	# ; 53
+SEMICOLON	,	# ; 59
 
 # special tokens:
 ERROR		,
-EOF)		= range(57)   # end-of-file
+EOF)		= range(62)   # end-of-file
 
 token_list = [
 "ID", 		# identifier 0
@@ -118,24 +123,29 @@ token_list = [
 "UPDATE",
 "SET",
 "WHERE"	,
-"DELETE",		# 40
+"DELETE",
+"SUM",
+"COUNT",
+"GROUP",
+"BY",
+"HAVING",		# 46
 
 # data types:
-"CHAR",		# 41
+"CHAR",		# 47
 "VARCHAR",
 "INT",
 "FLOAT",
-"DECIMAL",		# 45
+"DECIMAL",		# 51
 
 # punctuation:
-"LEFTBRACE" ,	# { 46
+"LEFTBRACE" ,	# { 52
 "RIGHTBRACE",	# }
 "LEFTBRACKET",	# [
 "RIGHTBRACKET",	# ]
 "LEFTPAREN",	# (
 "RIGHTPAREN",	# )
 "COMMA",	# ,
-"SEMICOLON",	# ; 53
+"SEMICOLON",	# ; 59
 
 # special tokens:
 "ERROR",
@@ -170,4 +180,9 @@ keywords = {"ALL" : ALL,
 			"INT" : INT,
 			"FLOAT" : FLOAT,
 			"DECIMAL" : DECIMAL,
-			"DELETE" : DELETE}
+			"DELETE" : DELETE,
+			"SUM" : SUM,
+			"COUNT" : COUNT,
+			"GROUP" : GROUP,
+			"BY" : BY,
+			"HAVING" : HAVING}

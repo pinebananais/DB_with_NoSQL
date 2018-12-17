@@ -1925,6 +1925,10 @@ char *redisGitDirty(void);
 uint64_t redisBuildId(void);
 
 /* Commands prototypes */
+
+long str2int(char *str);
+long compare_value(long lhs, char *oper, long rhs);
+void mylrangeCommand(client *c);
 void authCommand(client *c);
 void pingCommand(client *c);
 void echoCommand(client *c);
