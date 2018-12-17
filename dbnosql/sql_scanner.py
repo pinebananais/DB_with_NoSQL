@@ -87,10 +87,16 @@ class Scanner:
 			if self.cur_char == "=":
 				self.push_char()
 				return sql_token.LESSEQ
-			if self.cur_char == ">":
+			# if self.cur_char == ">":
+			# 	self.push_char()
+			# 	return sql_token.NOTEQ
+			return sql_token.LESS
+		if self.cur_char == "!":
+			self.push_char()
+			if self.cur_char == "=":
 				self.push_char()
 				return sql_token.NOTEQ
-			return sql_token.LESS
+			return sql_token.ERROR
 		if self.cur_char == "=":
 			self.push_char()
 			return sql_token.EQ

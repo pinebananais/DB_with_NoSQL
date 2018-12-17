@@ -61,15 +61,20 @@ class RedisConnector:
 		table_attrs = [i.decode() for i in table_attrs]
 
 		stmt_attrs = stmt.getAttributes()
-		print(stmt_attrs)
-		is_grouping = False
+		is_agg_in_attr = False
 		if stmt_attrs == "*":
 			stmt_attrs = table_attrs
 		elif stmt_attrs[0] == "SUM" or stmt_attrs[0] == "COUNT":
 			agg_function = stmt_attrs[0]
-			target_attr = stmt_attrs[1].getToStr()
-			is_grouping = True
-		if is_grouping == False and [i for i in stmt_attrs if i not in table_attrs]:
+
+			if stmt_attrs[1] == "*":
+				target_attr = "*"
+			elif not stmt_attrs[1]:
+				target_attr = None
+			else:
+				target_attr = stmt_attrs[1].getToStr()
+			is_agg_in_attr = True
+		if is_agg_in_attr == False and [i for i in stmt_attrs if i not in table_attrs]:
 			raise ValueError("SemanticError, Cannot select non-existent attribute")
 		
 		# modified by YIS 12-11
@@ -77,7 +82,6 @@ class RedisConnector:
 		# WHERE
 		table_row = [i for i in range(table_cell // table_col)]
 		if stmt.clauses:
-			print(stmt.clauses.getToList())
 			table_row = self.connector.execute_command('mylrange', meta_table_name, table_name, *stmt.clauses.getToList())
 
 		# GROUP BY
@@ -94,23 +98,35 @@ class RedisConnector:
 		else:
 			group_dict["_ALL_"] = table_row
 
-		print(group_dict)
-
 		# HAVING
 		having = stmt.getHavingClause()
-		having_op = stmt.getHavingClause().operator.getToStr()
-		having_literal = stmt.getHavingClause().literal.getToStr()
-		
-		if having:
+		if having and not group:
+			raise ValueError("SemanticError, Cannot come HAVING clause without GROUP BY")
+		elif having:
 			having_agg_function = having.aggregation[0]
-			having_target_attr = having.aggregation[1].getToStr()
-			
-			sub_result = dict()
 
+			if having.aggregation[1] == "*":
+				having_target_attr = "*"
+			elif not having.aggregation[1]:
+				having_target_attr = None
+			else:
+				having_target_attr = having.aggregation[1].getToStr()
+
+			delete_key_list = []
 			for group_row in group_dict.items():
 				sub_result = 0
 				for i in group_row[1]:
-					j = table_attrs.index(having_target_attr)
+					j = int()
+					if having_target_attr == "*" or not having_target_attr:
+						if having_agg_function == "SUM":
+							raise ValueError("SemanticError, Cannot use * in SUM aggregation function.")
+						elif having_agg_function == "COUNT":
+							j = 0
+						else:
+							print("What the fuckkkkkkkkkk in * aggregation")
+					else:
+						j = table_attrs.index(having_target_attr)
+
 					element = self.connector.lindex(table_name, table_col*i+j)
 					element = element.decode()
 					if having_agg_function == "SUM":
@@ -120,15 +136,20 @@ class RedisConnector:
 					else:
 						print("What the fuckkkkkkkkkk in HAVING")
 
+				if not self.isTrueClause(sub_result, having):
+					delete_key_list.append(group_row[0])
 
+			for element in delete_key_list:
+				del group_dict[element]
 
-		print(table_row)
-
-		if is_grouping:
+		if is_agg_in_attr:
 			print("=================", end = "")
 			print()
 			# attribute
-			attr = agg_function + "(" + target_attr + ")"
+			if not target_attr:
+				attr = agg_function + "(" + ")"
+			else:
+				attr = agg_function + "(" + target_attr + ")"
 			print("%15s" % (attr), end = " |")
 			print()
 			print("=================", end = "")
@@ -137,7 +158,17 @@ class RedisConnector:
 			for group_row in group_dict.values():
 				my_result = 0
 				for i in group_row:
-					j = table_attrs.index(target_attr)
+					j = int()
+					if target_attr == "*" or not target_attr:
+						if agg_function == "SUM":
+							raise ValueError("SemanticError, Cannot use * in SUM aggregation function.")
+						elif agg_function == "COUNT":
+							j = 0
+						else:
+							print("What the fuckkkkkkkkkk in * aggregation")
+					else:
+						j = table_attrs.index(target_attr)
+
 					element = self.connector.lindex(table_name, table_col*i+j)
 					element = element.decode()
 					if agg_function == "SUM":
@@ -193,7 +224,7 @@ class RedisConnector:
 
 		table_row = [i for i in range(table_cell // table_col)]
 		if stmt.clauses:
-			print(stmt.clauses.getToList())
+			# print(stmt.clauses.getToList())
 			table_row = self.connector.execute_command('mylrange', meta_table_name, table_name, *stmt.clauses.getToList())
 
 		for i in table_row:
@@ -219,7 +250,7 @@ class RedisConnector:
 
 		table_row = [i for i in range(table_cell // table_col)]
 		if stmt.clauses:
-			print(stmt.clauses.getToList())
+			# print(stmt.clauses.getToList())
 			table_row = self.connector.execute_command('mylrange', meta_table_name, table_name, *stmt.clauses.getToList())
 
 		for i in table_row:
@@ -255,6 +286,24 @@ class RedisConnector:
 		for table in tables:
 			print(table.split(b':')[0].decode())
 		print("=================")
+
+	# ">"|"="|"<"|">="|"!="|"<="
+	def isTrueClause(self, result, having_clause):
+		if having_clause.operator.getToStr() == ">":
+			return (result > int(having_clause.literal.getToStr()))
+		elif having_clause.operator.getToStr() == "<":
+			return (result < int(having_clause.literal.getToStr()))
+		elif having_clause.operator.getToStr() == ">=":
+			return (result >= int(having_clause.literal.getToStr()))
+		elif having_clause.operator.getToStr() == "<=":
+			return (result <= int(having_clause.literal.getToStr()))
+		elif having_clause.operator.getToStr() == "!=":
+			return (result != int(having_clause.literal.getToStr()))
+		elif having_clause.operator.getToStr() == "=":
+			return (result == int(having_clause.literal.getToStr()))
+		else:
+			print("what the fxxxxx in having clause~")
+
 
 	####################################################
 	# in redis, I defined KEY string format as shown below

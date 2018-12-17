@@ -270,7 +270,7 @@ class Parser:
 		else:
 			raise ValueError('SyntaxError, Expected Token is \"{0}\" but entered Token is \"{1}\"'.format("INT or VARCHAR", self.current_token.content))
 
-	# operator := ">"|"="|"<"|">="|"!="|"<="
+	# operator := ">"|"="|"<"|">="|"!="|"<="|LIKE
 	# sql_token.NOTEQ is "<>" or "!=" ?
 	def parseOperator(self):
 		if self.current_token.kind == sql_token.GREATER or \
@@ -294,13 +294,22 @@ class Parser:
 		if self.current_token.kind == sql_token.SUM:
 			aggregation.append(self.current_token.content)
 			self.acceptIt()
+			self.accept(sql_token.LEFTPAREN)
+			identifier = self.parseIdentifier()
+			aggregation.append(identifier)
+			self.accept(sql_token.RIGHTPAREN)
 		elif self.current_token.kind == sql_token.COUNT:
 			aggregation.append(self.current_token.content)
 			self.acceptIt()
-		self.accept(sql_token.LEFTPAREN)
-		identifier = self.parseIdentifier()
-		aggregation.append(identifier)
-		self.accept(sql_token.RIGHTPAREN)
+			self.accept(sql_token.LEFTPAREN)
+			identifier = None
+			if self.current_token.kind == sql_token.ID:
+				identifier = self.parseIdentifier()
+			elif self.current_token.kind == sql_token.ASTER:
+				identifier = self.current_token.content
+				self.acceptIt()
+			aggregation.append(identifier)
+			self.accept(sql_token.RIGHTPAREN)
 
 		return aggregation
 

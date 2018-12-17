@@ -65,7 +65,7 @@ class SelectStmt(Stmt):
 		else:
 			return self.group.getToStr()
 
-	def getHavingClause(seif):
+	def getHavingClause(self):
 		if not self.having_clause:
 			return None
 		else:
@@ -121,9 +121,6 @@ class HavingClause:
 		self.aggregation = aggregation # list [SUM or Count, ID]
 		self.operator = operator # Operator
 		self.literal = literal # Literal
-
-	
-
 
 class VarDecl:
 	def __init__(self, attribute_name, attribute_type):
