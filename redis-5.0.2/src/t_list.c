@@ -441,6 +441,288 @@ void lrangeCommand(client *c) {
     }
 }
 
+// modified by YIS 12-12 
+
+long compare_value(long lhs, char *oper, long rhs){
+	printf("in function : %ld %s %ld\n", lhs, oper, rhs);
+	if(strcmp(oper, "<") == 0) return lhs < rhs;
+	if(strcmp(oper, ">") == 0) return lhs > rhs;
+	if(strcmp(oper, "=") == 0) return lhs == rhs;
+	if(strcmp(oper, "<>") == 0) return lhs != rhs;
+	if(strcmp(oper, "<=") == 0) return lhs <= rhs;
+	if(strcmp(oper, ">=") == 0) return lhs >= rhs;
+}
+
+long pattern_match(const char *s, const char *p) {
+    if(*s == 0 && *p == 0) return 1;
+    if(*p == 0) return 0;
+    if(*p == 37 && *s == 0) return pattern_match(s, p + 1);
+    if(*p == 37) return pattern_match(s, p + 1) || pattern_match(s + 1, p);
+    if(*p == '_' && *s == 0) return 0;
+    if(*p == '_') return pattern_match(s + 1, p + 1);
+    if(*s == 0) return 0;
+	return (*s == *p) && pattern_match(s + 1, p + 1);
+} 
+
+long compare_str(char *lhs, char *oper, char *rhs){
+	printf("in function : %s %s %s\n", lhs, oper, rhs);
+	if(strcmp(oper, "=") == 0) return !(strcmp(lhs, rhs));
+	if(strcmp(oper, "<>") == 0) return strcmp(lhs, rhs);
+	if(strcmp(oper, "LIKE") == 0) return pattern_match(lhs, rhs);
+}
+
+long str2int(char *str){
+	long res = 0;
+	long i;
+	for(i = 0; str[i] != 0; i++){
+		res *= 10;
+		res += str[i] - '0';
+	}
+	return res;
+}
+
+// multipredicate
+
+void mylrangeCommand(client *c) { // single predicate
+	printf("Entered\n");
+    robj *o;
+    robj *oh;
+    hashTypeIterator *hi;
+    long start, end, llen, rangelen, i;
+    if ((oh = lookupKeyReadOrReply(c,c->argv[1],shared.emptymultibulk)) == NULL
+         || checkType(c,oh,OBJ_HASH)) return;
+    if ((o = lookupKeyReadOrReply(c,c->argv[2],shared.emptymultibulk)) == NULL
+         || checkType(c,o,OBJ_LIST)) return;
+    llen = listTypeLength(o); // # of total table cells
+    printf("%ld\n", c->argc);
+    long argcnt = 3;
+    long **stack = (long**)malloc(sizeof(long*)*10);
+    long top = -1;
+    long cursz = 10;
+    long rowlen = 0;
+    while (argcnt < c->argc){
+    	if(strcmp((char*)c->argv[argcnt]->ptr, "AND") == 0){
+    		long *fi = stack[top--];
+    		long *se = stack[top--];
+    		long fisz = fi[0];
+    		long fidx = 1;
+    		long sesz = se[0];
+    		long sedx = 1;
+    		long *res = (long*)malloc(sizeof(long) * 10);
+    		long rescnt = 1;
+    		while(fidx <= fisz && sedx <= sesz){
+    			if(fi[fidx] == se[sedx]){
+    				res[rescnt++] = fi[fidx];
+    				if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+    				fidx++;
+    				sedx++;
+    			}
+    			else if(fi[fidx] > se[sedx]) sedx++;
+    			else if(fi[fidx] < se[sedx]) fidx++;
+    		}
+    		free(fi), free(se);
+    		res[0] = rescnt - 1;
+    		stack[++top] = res;
+    		if(top == cursz - 1){
+    			stack = (long**)realloc(stack, sizeof(long*)*(cursz+10));
+    			cursz += 10;
+    		}
+    		argcnt++;
+    		continue;
+    	}
+    	else if(strcmp((char*)c->argv[argcnt]->ptr, "OR") == 0){
+    		long *fi = stack[top--];
+    		long *se = stack[top--];
+    		long fisz = fi[0];
+    		long fidx = 1;
+    		long sesz = se[0];
+    		long sedx = 1;
+    		printf("size : %ld %ld\n", fisz, sesz);
+    		printf("size : %ld %ld\n", fi[1], se[1]);
+    		long *res = (long*)malloc(sizeof(long) * 10);
+    		long rescnt = 1;
+    		while(fidx <= fisz && sedx <= sesz){
+    			if(fi[fidx] == se[sedx]){
+    				res[rescnt++] = fi[fidx];
+    				if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+    				fidx++;
+    				sedx++;
+    			}
+    			else if(fi[fidx] > se[sedx]){
+    				res[rescnt++] = se[sedx];
+					if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+					sedx++;
+    			}
+    			else if(fi[fidx] < se[sedx]){
+    				res[rescnt++] = fi[fidx];
+					if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+					fidx++;
+    			}
+    		}
+    		while(fidx <= fisz){
+    			res[rescnt++] = fi[fidx];
+				if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+				fidx++;
+    		}
+    		while(sedx <= sesz){
+    			res[rescnt++] = se[sedx];
+				if(rescnt % 10 == 0) res = (long*)realloc(res, sizeof(long)*(rescnt + 10));
+				sedx++;
+    		}
+    		free(fi), free(se);
+    		res[0] = rescnt - 1;
+    		stack[++top] = res;
+    		if(top == cursz - 1){
+    			stack = (long**)realloc(stack, sizeof(long*)*(cursz+10));
+    			cursz += 10;
+    		}
+    		argcnt++;
+    		continue;
+    	}
+		char *arg1 = (char*)c->argv[argcnt++]->ptr;
+		char *arg2 = (char*)c->argv[argcnt++]->ptr;
+		char *arg3 = (char*)c->argv[argcnt++]->ptr;
+		char *arg4 = (char*)c->argv[argcnt++]->ptr;
+		long *index_arr = (long*)malloc(sizeof(long) * 10); // result list
+		long index = 0; // index # of target attr
+		long attr_count = 0; // colomn count
+		long count = 1;
+		
+		hi = hashTypeInitIterator(oh);
+		while (hashTypeNext(hi) != C_ERR) {
+			unsigned char *vstr = NULL;
+			unsigned char rstr[128];
+		    unsigned int vlen = UINT_MAX;
+		    long long vll = LLONG_MAX;
+			int what;
+		    hashTypeCurrentFromZiplist(hi, OBJ_HASH_KEY, &vstr, &vlen, &vll);
+		    strncpy(rstr, vstr, vlen);
+		    rstr[vlen] = '\0';
+		    if(strcmp(arg1, rstr) == 0) index = attr_count;
+		    attr_count++;
+		}
+
+		hashTypeReleaseIterator(hi);
+		rowlen = llen / attr_count; // # of rows
+		if (o->encoding == OBJ_ENCODING_QUICKLIST) {
+			 for(i = 0; i < rowlen; i++){
+				quicklistEntry entry;
+				int look = i * attr_count + index; // index of each target attr
+				if (quicklistIndex(o->ptr, look, &entry)) {
+				    long val = entry.longval;
+					if(arg4[0] == '1'){
+						if(compare_value(val, arg2, str2int(arg3))){ // if condition satisfied
+							index_arr[count++] = i; // accept to result list
+						}
+					}
+					else{
+						char buff[128] = {0,};
+						strncpy(buff, entry.value, entry.sz);
+						if(compare_str(buff, arg2, arg3)){
+							index_arr[count++] = i; // accept to result list
+						}
+					}
+				} else {
+				    addReply(c,shared.nullbulk);
+				}
+				if(count % 10 == 0){ // reallocate result list when over its capacity
+					index_arr = (long*)realloc(index_arr, sizeof(long)*(count + 10));
+				}
+			 }
+		} else {
+		    serverPanic("Unknown list encoding");
+		}
+		index_arr[0] = count - 1; // every stack element has its size in 0'th index
+		stack[++top] = index_arr;
+		if(top == cursz - 1){
+			stack = (long**)realloc(stack, sizeof(long*)*(cursz+10));
+			cursz += 10;
+		}
+	}
+	printf("top val : %ld :\n", top);
+	long count = stack[0][0];
+    addReplyMultiBulkLen(c, count); // write total number
+    for(i = 1; i <= count; i++) addReplyLongLong(c, stack[0][i]); // write each number in result list
+    free(stack[0]);
+    free(stack);
+}
+
+// multi predicate end
+
+void mylrangeCommand_deprecated(client *c) { // single predicate
+	printf("Entered\n");
+    robj *o;
+    robj *oh;
+    hashTypeIterator *hi;
+    long start, end, llen, rangelen, i;
+    if ((oh = lookupKeyReadOrReply(c,c->argv[1],shared.emptymultibulk)) == NULL
+         || checkType(c,oh,OBJ_HASH)) return;
+    if ((o = lookupKeyReadOrReply(c,c->argv[2],shared.emptymultibulk)) == NULL
+         || checkType(c,o,OBJ_LIST)) return;
+    llen = listTypeLength(o); // # of total table cells
+    printf("%ld\n", c->argc);
+	char *arg1 = (char*)c->argv[3]->ptr;
+	char *arg2 = (char*)c->argv[4]->ptr;
+	char *arg3 = (char*)c->argv[5]->ptr;
+	char *arg4 = (char*)c->argv[6]->ptr;
+	printf("first arg : %s\n", arg1);
+    long *index_arr = (long*)malloc(sizeof(long) * 10); // result list
+    long index = 0; // index # of target attr
+    long attr_count = 0; // colomn count
+    long count = 0;
+    
+    hi = hashTypeInitIterator(oh);
+    while (hashTypeNext(hi) != C_ERR) {
+    	unsigned char *vstr = NULL;
+    	unsigned char rstr[128];
+        unsigned int vlen = UINT_MAX;
+        long long vll = LLONG_MAX;
+	int what;
+        hashTypeCurrentFromZiplist(hi, OBJ_HASH_KEY, &vstr, &vlen, &vll);
+        strncpy(rstr, vstr, vlen);
+        rstr[vlen] = '\0';
+        if(strcmp(arg1, rstr) == 0) index = attr_count;
+        attr_count++;
+    }
+
+    hashTypeReleaseIterator(hi);
+    llen /= attr_count; // # of rows
+    if (o->encoding == OBJ_ENCODING_QUICKLIST) {
+		 for(i = 0; i < llen; i++){
+		    quicklistEntry entry;
+		    int look = i * attr_count + index; // index of each target attr
+		    if (quicklistIndex(o->ptr, look, &entry)) {
+		        long val = entry.longval;
+		        printf("%s\n", arg3);
+				if(arg4[0] == '1'){
+				    if(compare_value(val, arg2, str2int(arg3))){ // if condition satisfied
+				    	index_arr[count++] = i; // accept to result list
+				    }
+				}
+				else{
+					char buff[128] = {0,};
+					strncpy(buff, entry.value, entry.sz);
+					if(compare_str(buff, arg2, arg3)){
+						index_arr[count++] = i; // accept to result list
+					}
+				}
+		    } else {
+		        addReply(c,shared.nullbulk);
+		    }
+		    if(count % 10 == 0 && count > 0){ // reallocate result list when over its capacity
+		    	index_arr = (long*)realloc(index_arr, sizeof(long)*count*2);
+		    }
+		 }
+    } else {
+        serverPanic("Unknown list encoding");
+    }
+    addReplyMultiBulkLen(c, count); // write total number
+    for(i = 0; i < count; i++) addReplyLongLong(c, index_arr[i]); // write each number in result list
+    free(index_arr);
+}
+
+// end
+
 void ltrimCommand(client *c) {
     robj *o;
     long start, end, llen, ltrim, rtrim;

@@ -43,7 +43,7 @@ insert-stmt
 > **INSERT INTO** identifier **VALUES "("** literals **")" ";"**
 
 select-stmt
-> **SELECT** ( __"*"__ | identifiers ) **FROM** identifier ( **Where** clause )? **";"**
+> **SELECT** ( __"*"__ | identifiers | aggregation) **FROM** identifier ( **Where** clause )? ( **GROUP BY** identifier )? ( **HAVING** having-clause )? **";"**
 
 update-stmt
 > **UPDATE** identifier **SET** identifier **"="** literal ( **WHERE** clause )? **";"** 
@@ -69,8 +69,14 @@ clauses
 clause
 > identifier filter literal
 
+having-clause
+> aggregation filter literal
+
 operator
 > ( **">"** | **"="** | **"<"** | **">="** | **"!="** | **"<="** )
+
+aggregation
+> **SUM** **"("** identifier **")"** | **COUNT** **"("** identifier **")"**
 
 identifiers
 > identifier ( **","** identifier )*

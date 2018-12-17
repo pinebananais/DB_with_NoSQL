@@ -41,19 +41,35 @@ class InsertStmt(Stmt):
 		return result
 
 class SelectStmt(Stmt):
-	def __init__(self, table_attributes, table_name, clauses):
+	def __init__(self, table_attributes, table_name, clauses, group, having_clause):
 		super().__init__(table_name) # ID
-		self.table_attributes = table_attributes # list of ID or "*"
+		self.table_attributes = table_attributes # list of ID or "*" or list = [SUM or COUNT, ID]
 		self.clauses = clauses  # Clauses
+		self.group = group	# ID
+		self.having_clause = having_clause # HavingClause
 
 	def getAttributes(self):
 		if self.table_attributes == '*':
 			return str("*")
+		elif self.table_attributes[0] == "SUM":
+			return self.table_attributes
 		else:
 			result = list()
 			for attribute in self.table_attributes:
 				result.append(attribute.getToStr())
 			return result
+
+	def getGroupName(self):
+		if not self.group:
+			return None
+		else:
+			return self.group.getToStr()
+
+	def getHavingClause(seif):
+		if not self.having_clause:
+			return None
+		else:
+			return self.having_clause
 
 class UpdateStmt(Stmt):
 	def __init__(self, table_name, table_attribute, literal, clauses):
@@ -99,6 +115,13 @@ class Clause:
 		self.type = 1 if self.literal.data_type.value == "INT" else 0
 	def getToList(self):
 		return [self.table_attribute.getToStr(), self.operator.getToStr(), self.literal.getToStr(), self.type]
+
+class HavingClause:
+	def __init__(self, aggregation, operator, literal):
+		self.aggregation = aggregation # list [SUM or Count, ID]
+		self.operator = operator # Operator
+		self.literal = literal # Literal
+
 
 class VarDecl:
 	def __init__(self, attribute_name, attribute_type):
