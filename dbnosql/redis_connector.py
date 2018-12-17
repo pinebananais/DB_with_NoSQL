@@ -1,11 +1,14 @@
 import redis
 from sql_ast import *
 import sql_parser
+from rediscluster import StrictRedisCluster
 
 class RedisConnector:
 	def __init__(self):
 		self.parser = sql_parser.Parser()
-		self.connector = redis.Redis(host='localhost', port=6379, db=0) # redis connector
+ 		startup_nodes = [{"host": "127.0.0.1", "port": "6001"}, {"host": "127.0.0.1", "port": "6002"}, {"host": "127.0.0.1", "port": "6003"}]
+		#self.connector = redis.Redis(host='localhost', port=6379, db=0) # redis connector
+		self.connector = StrictRedisCluster(startup_nodes=startup_nodes, decode_responses=True)
 
 	def showCommand(self):
 		self.printTableList()
