@@ -2,11 +2,17 @@ import redis
 from sql_ast import *
 from collections import OrderedDict
 import sql_parser
+#from rediscluster import StrictRedisCluster
 
 class RedisConnector:
 	def __init__(self):
 		self.parser = sql_parser.Parser()
-		self.connector = redis.Redis(host='localhost', port=6379, db=0) # redis connector
+		self.cluster_flag = False
+		if self.cluster_flag:
+			self.startup_nodes = [{"host": "127.0.0.1", "port": "6001"}, {"host": "127.0.0.1", "port": "6002"}, {"host": "127.0.0.1", "port": "6003"}]
+			self.connector = StrictRedisCluster(startup_nodes=self.startup_nodes, decode_responses=True)
+		else:
+			self.connector = redis.Redis(host='localhost', port=6379, db=0) # redis connector
 
 	def showCommand(self):
 		self.printTableList()
@@ -38,7 +44,10 @@ class RedisConnector:
 			raise ValueError("SemanticError, the number of literals and table attributes doesn't match")
 
 		table_types = self.connector.hvals(meta_table_name)
-		table_types = [i.decode() for i in table_types]
+		if self.cluster_flag:
+			table_types = [i for i in table_types]
+		else:
+			table_types = [i.decode() for i in table_types]
 		stmt_types = stmt.getLiteralTypes()
 		if table_types != [i for i,j in zip(table_types, stmt_types) if i == j]:
 			raise ValueError("SemanticError, the type of literal and attribute doesn't match")
@@ -58,8 +67,10 @@ class RedisConnector:
 		table_cell = self.connector.llen(table_name)
 
 		table_attrs = self.connector.hkeys(meta_table_name)
-		table_attrs = [i.decode() for i in table_attrs]
-
+		if self.cluster_flag:
+			table_attrs = [i for i in table_attrs]
+		else :
+			table_attrs = [i.decode() for i in table_attrs]
 		stmt_attrs = stmt.getAttributes()
 		is_agg_in_attr = False
 		if stmt_attrs == "*":
@@ -128,7 +139,7 @@ class RedisConnector:
 						j = table_attrs.index(having_target_attr)
 
 					element = self.connector.lindex(table_name, table_col*i+j)
-					element = element.decode()
+					if not self.cluster_flag: element = element.decode()
 					if having_agg_function == "SUM":
 						sub_result += int(element)
 					elif having_agg_function == "COUNT":
@@ -170,7 +181,7 @@ class RedisConnector:
 						j = table_attrs.index(target_attr)
 
 					element = self.connector.lindex(table_name, table_col*i+j)
-					element = element.decode()
+					if not self.cluster_flag: element = element.decode()
 					if agg_function == "SUM":
 						my_result += int(element)
 					elif agg_function == "COUNT":

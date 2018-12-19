@@ -448,7 +448,7 @@ long compare_value(long lhs, char *oper, long rhs){
 	if(strcmp(oper, "<") == 0) return lhs < rhs;
 	if(strcmp(oper, ">") == 0) return lhs > rhs;
 	if(strcmp(oper, "=") == 0) return lhs == rhs;
-	if(strcmp(oper, "<>") == 0) return lhs != rhs;
+	if(strcmp(oper, "!=") == 0) return lhs != rhs;
 	if(strcmp(oper, "<=") == 0) return lhs <= rhs;
 	if(strcmp(oper, ">=") == 0) return lhs >= rhs;
 }
@@ -467,7 +467,7 @@ long pattern_match(const char *s, const char *p) {
 long compare_str(char *lhs, char *oper, char *rhs){
 	printf("in function : %s %s %s\n", lhs, oper, rhs);
 	if(strcmp(oper, "=") == 0) return !(strcmp(lhs, rhs));
-	if(strcmp(oper, "<>") == 0) return strcmp(lhs, rhs);
+	if(strcmp(oper, "!=") == 0) return strcmp(lhs, rhs);
 	if(strcmp(oper, "LIKE") == 0) return pattern_match(lhs, rhs);
 }
 
