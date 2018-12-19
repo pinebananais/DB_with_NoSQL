@@ -1,5 +1,5 @@
 # DB_with_NoSQL
-> database project : stimulate DB with NOSQL
+> database project : simulate DB with NOSQL
 
 ## How to (re)compile Redis source code
 
